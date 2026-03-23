@@ -1,0 +1,69 @@
+﻿using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BankAccountManager
+{
+    public class UserRepository : IUsersRepository
+    {
+        private readonly SqlConnection _conn;
+
+        public UserRepository(SqlConnection conn)
+        {
+            _conn = conn;
+        }
+        private List<User> _users = [];
+        public List<User> GetAllUsers()
+        {
+            string query = "SELECT ac.UserId, ac.UserName, ud.FirstName, ud.LastName, ba.Id AS BankAccountId, " +
+                "ba.Balance FROM AccountCredentials ac JOIN UserDetails ud ON ud.UserId = " +
+                "ac.UserId JOIN BankAccount ba ON ba.UserId = ac.UserId";
+            using (SqlCommand cmd = new SqlCommand(query, _conn))
+            using (SqlDataReader reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    _users.Add(new User
+                    {
+                        UserId = reader["UserId"].ToString(),
+                        FirstName = reader["FirstName"].ToString(),
+                        LastName = reader["LastName"].ToString(),
+                        UserName = reader["UserName"].ToString(),
+                        GetBankAccountRepository = new BankAccountRepository()
+                        {
+                            UserId = reader["UserId"].ToString() ?? "Not found",
+                            Id = Convert.ToInt32(reader["BankAccountId"]),
+                            Balance = Convert.ToDecimal(reader["Balance"])
+                        }
+
+                    });
+                }
+            }
+            return _users;
+        }
+        public bool ValidatePassword(string userId, string password)
+        {
+            string query = "SELECT COUNT(*) FROM AccountCredentials WHERE UserId = @userId AND Password = @password";
+            using (SqlCommand cmd = new SqlCommand(query, _conn))
+            {
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@password", password);
+                int count = (int)cmd.ExecuteScalar();
+                return count > 0;
+            }
+        }
+        public User? FindUserById(string id)
+        {
+            return _users.FirstOrDefault(u =>
+            u.UserId == id);
+        }
+
+        public User? FindUserByUsername(string userName)
+        {
+            return _users.FirstOrDefault(a => a.UserName == userName);
+        }
+    }
+}
