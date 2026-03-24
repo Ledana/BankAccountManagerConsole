@@ -18,7 +18,7 @@ namespace BankAccountManager
         private List<User> _users = [];
         public List<User> GetAllUsers()
         {
-
+            _users.Clear();
             string query = "SELECT ac.UserId, ac.UserName, ud.FirstName, ud.LastName, ba.Id AS BankAccountId, " +
                 "ba.Balance FROM AccountCredentials ac JOIN UserDetails ud ON ud.UserId = " +
                 "ac.UserId JOIN BankAccount ba ON ba.UserId = ac.UserId";

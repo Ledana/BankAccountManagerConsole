@@ -24,11 +24,11 @@ namespace BankAccountManager
 
         public void MakeDeposit(decimal amount, SqlConnection conn)
         {
-            if (amount < 0)
+            if (amount <= 0)
                 Console.WriteLine("The amount should be positive");
 
-            else if (amount == 0)
-                return;
+            else if (amount < 50)
+                Console.WriteLine("The amount should be larger or equal to 50.00");
             else
             {
                 string insertQuery = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
@@ -128,9 +128,9 @@ namespace BankAccountManager
                 Console.WriteLine("You can not transfer money to yourself");
                 return;
             }
-            else
-            {
-                int movementId;
+
+            // perform DB changes (existing code)...
+            int movementId;
                 int targetMovementId;
                 //insert into table movements for this bank account
                 string insertIntoMovementQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
@@ -189,11 +189,12 @@ namespace BankAccountManager
                     updateCmd.ExecuteNonQuery();
                 }
 
-                //_balance -= amount;
-                //bankAccount.creditAmount(amount);
+                _balance -= amount;
+                bankAccount.creditAmount(amount);
+            _movements.Add($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"Your balance is now {_balance - amount}");
-            }
+            
         }
 
         public void GetMovements(SqlConnection conn)

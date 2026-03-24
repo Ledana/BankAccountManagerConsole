@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using Microsoft.Data.SqlClient;
 
@@ -17,11 +18,6 @@ namespace BankAccountManager
                 conn.Open();
                 try
                 {
-                    var allUsers = GetRepository(new UserRepository(conn));
-                    //var allUsers = GetRepository(new FakeUsersRepository());
-                    var users = allUsers.GetAllUsers();
-                                       
-
                    string ? username = "";
 
                     Console.WriteLine("Wellcome to our bank app");
@@ -34,6 +30,9 @@ namespace BankAccountManager
                             Console.WriteLine("The username is not in the right format");
                             continue;
                         }
+                        var allUsers = GetRepository(new UserRepository(conn));
+                        //var allUsers = GetRepository(new FakeUsersRepository());
+                        var users = allUsers.GetAllUsers();
 
                         var user = allUsers.FindUserByUsername(username);
 
@@ -51,11 +50,15 @@ namespace BankAccountManager
                                         Console.WriteLine($"You balance is: {user.GetBankAccountRepository.Balance:F2}\n");
                                         break;
                                     }
+                                    //if the user doesnt remember password can exit the app
+                                    else if (username == "exit")
+                                        break;
                                     else
-                                    {
+                                    {   
                                         Console.WriteLine("The password is incorrect, try again or type 'exit' to log out");
-                                    }
+                                    }  
                                 }
+                                
                             }
                         }
                         else
