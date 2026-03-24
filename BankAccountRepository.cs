@@ -13,10 +13,10 @@ namespace BankAccountManager
         public decimal Balance
         {
             get { return _balance; }
-            set { _balance = value; }           
+            private set { _balance = value; }           
         }
-        public int Id { get; set; }
-        public string UserId { get; set; }
+        public int Id { get;}
+        public string UserId { get;}
         private List<string> _movements = [];
 
         public BankAccountRepository() { }
@@ -165,10 +165,14 @@ namespace BankAccountManager
                     updateCmd.ExecuteNonQuery();
                 }
                 _balance -= amount;
-                bankAccount.Balance += amount;
+                bankAccount.creditAmount(amount);
                 Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"Your balance is now {_balance}");
             }
+        }
+        public void creditAmount(decimal amount)
+        {
+             _balance += amount;
         }
 
         public void GetMovements(SqlConnection conn)
@@ -239,6 +243,11 @@ namespace BankAccountManager
                     Console.WriteLine(item);
                 }
             }
+        }
+
+        public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
+        {
+            this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");
         }
     }
 }

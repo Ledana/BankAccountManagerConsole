@@ -82,8 +82,8 @@ namespace BankAccountManager
             else
             {
                 _balance -= amount;
-                bankAccount.Balance += amount;
-                //bankAccount._movements.Add($"{UserId} transfered you {amount} at {DateTime.Now}");
+                bankAccount.creditAmount(amount);
+                bankAccount.addMovement(this, amount, conn, DateTime.Now);
 
                 Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"Your balance is now {_balance}");
@@ -102,6 +102,16 @@ namespace BankAccountManager
                     Console.WriteLine(item);
                 }
             }
+        }
+
+        public void creditAmount(decimal amount)
+        {
+            _balance += amount;
+        }
+
+        public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
+        {
+            this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");
         }
     }
 }

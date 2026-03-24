@@ -11,10 +11,10 @@ namespace BankAccountManager
     {
         public decimal Balance
         {
-            get; set;
+            get; 
         }
-        public int Id { get; set; }
-        public string UserId { get; set; }
+        public int Id { get; }
+        public string UserId { get;}
 
         //public List<string> _movements { get; set; }
         
@@ -24,5 +24,7 @@ namespace BankAccountManager
 
         public void TransferMoney(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn);
         public void GetMovements(SqlConnection conn);
+        public void creditAmount(decimal amount);
+        public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime);
     }
 }
