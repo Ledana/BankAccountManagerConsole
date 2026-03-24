@@ -131,7 +131,7 @@ namespace BankAccountManager
             else
             {
                 int movementId;
-
+                int targetMovementId;
                 //insert into table movements for this bank account
                 string insertIntoMovementQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
                 VALUES (@BankAccountId, 'Transfer', @Date)";
@@ -162,19 +162,19 @@ namespace BankAccountManager
                 }
 
                 //insert into table movements for the target bank account
-                string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) VALUES (@BankAccountId, 'Transfer', @Date)";
+                string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id VALUES (@BankAccountId, 'Transfer', @Date)";
                 using (SqlCommand cmd = new(insertIntoMovementTarget, conn))
                 {
                     cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
                     cmd.Parameters.AddWithValue("@Date", DateTime.Now);
-                    cmd.ExecuteNonQuery();
+                    targetMovementId = (int)cmd.ExecuteScalar();
                 }
 
                 //insert into table trasnfer for the target bank account
                 string insertIntoTransferTarget = @"INSERT INTO [Transfer] (MovementId, Amount, FromBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
                 using (SqlCommand cmd = new(insertIntoTransferTarget, conn))
                 {
-                    cmd.Parameters.AddWithValue("@MovementId", movementId);
+                    cmd.Parameters.AddWithValue("@MovementId", targetMovementId);
                     cmd.Parameters.AddWithValue("@Amount", amount);
                     cmd.Parameters.AddWithValue("@BankAccountId", Id);
                     cmd.ExecuteNonQuery();
@@ -190,10 +190,8 @@ namespace BankAccountManager
                 }
 
 
-                _balance -= amount;
-                bankAccount.creditAmount(amount);
                 Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
-                Console.WriteLine($"Your balance is now {_balance}");
+                Console.WriteLine($"Your balance is now {_balance - amount}");
             }
         }
 
