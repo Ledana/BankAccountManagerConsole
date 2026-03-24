@@ -30,6 +30,10 @@ namespace BankAccountManager
                             Console.WriteLine("The username is not in the right format");
                             continue;
                         }
+                        //allusers choose if you want to work with the real repository which has access
+                        //in the database or the fake repository with hard coded users
+                        //everytime a user logs out and the user is asked for username to log in, the list
+                        //of allusers is updated with the latest change from the database
                         var allUsers = GetRepository(new UserRepository(conn));
                         //var allUsers = GetRepository(new FakeUsersRepository());
                         var users = allUsers.GetAllUsers();
@@ -41,6 +45,7 @@ namespace BankAccountManager
                             while (true)
                             {
                                 Console.WriteLine("Please put you password: ");
+                                //putting the pasword input in the username variable so if 'exit' is typed to close the app
                                 username = Console.ReadLine();
                                 if (username != null)
                                 {
@@ -66,7 +71,6 @@ namespace BankAccountManager
                             Console.WriteLine("The username is not in the right format");
                             continue;
                         }
-
 
                         if (username == "exit") break;
 
