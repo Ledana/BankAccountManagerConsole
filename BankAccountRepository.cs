@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -170,10 +171,6 @@ namespace BankAccountManager
                 Console.WriteLine($"Your balance is now {_balance}");
             }
         }
-        public void creditAmount(decimal amount)
-        {
-             _balance += amount;
-        }
 
         public void GetMovements(SqlConnection conn)
         {
@@ -235,7 +232,7 @@ namespace BankAccountManager
                 }
             }
             if (_movements.Count == 0)
-                _movements.Add("You have no movements");
+                Console.WriteLine("You have no movements");
             else
             {
                 foreach (var item in _movements)
@@ -244,7 +241,13 @@ namespace BankAccountManager
                 }
             }
         }
+        //changing the balance when another bank account transfered money to this
+        public void creditAmount(decimal amount)
+        {
+            _balance += amount;
+        }
 
+        //adding the movement when another bank account transfered money to this
         public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
         {
             this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");

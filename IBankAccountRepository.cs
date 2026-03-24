@@ -24,7 +24,9 @@ namespace BankAccountManager
 
         public void TransferMoney(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn);
         public void GetMovements(SqlConnection conn);
+        //a method to change the balance of another bank account
         public void creditAmount(decimal amount);
+        //a method to add to movements of another bank account
         public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime);
     }
 }

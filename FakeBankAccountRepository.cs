@@ -104,11 +104,13 @@ namespace BankAccountManager
             }
         }
 
+        //changing the balance when another bank account transfers moeny to this
         public void creditAmount(decimal amount)
         {
             _balance += amount;
         }
 
+        //adding to movements when another bank account transfers money to this
         public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
         {
             this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");
