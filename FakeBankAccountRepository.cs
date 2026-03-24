@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Time.Testing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,8 @@ namespace BankAccountManager
 
         public void MakeDeposit(decimal amount, SqlConnection conn)
         {
+            //adding a fake time for testing
+            var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
             if (amount < 0)
                 Console.WriteLine("The amount should be positive");
 
@@ -36,12 +39,14 @@ namespace BankAccountManager
             {
                 _balance += amount;
                 Console.WriteLine($"You deposidet {amount} and your balance now is {_balance}");
-                _movements.Add($"You deposited {amount} in {DateTime.Now}");
+                _movements.Add($"You deposited {amount} in {fakeTime.GetUtcNow().DateTime}");
             }
         }
 
         public void MakeWithdraw(decimal amount, SqlConnection conn)
         {
+            //adding a fake time for testing
+            var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
             if (amount <= 0)
             {
                 Console.WriteLine("The amount should be positive");
@@ -55,12 +60,15 @@ namespace BankAccountManager
             {
                 _balance -= amount;
                 Console.WriteLine($"You withdrawed {amount} and your balance now is {_balance}");
-                _movements.Add($"You withdrawed {amount} at {DateTime.Now}");
+                _movements.Add($"You withdrawed {amount} at {fakeTime.GetUtcNow().DateTime}");
             }
         }
 
         public void TransferMoney(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn)
         {
+            //adding a fake time for testing
+            var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
+
             if (amount <= 0)
             {
                 Console.WriteLine("The amount should be positive");
@@ -83,11 +91,11 @@ namespace BankAccountManager
             {
                 _balance -= amount;
                 bankAccount.creditAmount(amount);
-                bankAccount.addMovement(this, amount, conn, DateTime.Now);
+                bankAccount.addMovement(this, amount, conn, fakeTime.GetUtcNow().DateTime);
 
                 Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"Your balance is now {_balance}");
-                _movements.Add($"You transfered {amount} to {bankAccount.UserId} at {DateTime.Now}");
+                _movements.Add($"You transfered {amount} to {bankAccount.UserId} at {fakeTime.GetUtcNow().DateTime}");
             }
         }
 

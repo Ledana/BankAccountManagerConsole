@@ -20,6 +20,7 @@ namespace BankAccountManager
         public string UserId { get; set; }
         private List<string> _movements = [];
 
+
         public BankAccountRepository() { }
 
         public void MakeDeposit(decimal amount, SqlConnection conn)

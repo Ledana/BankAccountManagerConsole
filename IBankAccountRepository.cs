@@ -17,7 +17,7 @@ namespace BankAccountManager
         public string UserId { get; set; }
 
         //public List<string> _movements { get; set; }
-        
+        //public readonly TimeProvider _timeProvider;
 
         public void MakeDeposit(decimal amount, SqlConnection conn);
         public void MakeWithdraw(decimal amount, SqlConnection conn);
