@@ -8,7 +8,6 @@ namespace BankAccountManager
 {
     public  interface IUsersRepository
     {
-        //public List<User> Users { get; }
         public List<User> GetAllUsers();
         public bool ValidatePassword(string userId, string password);
         public User? FindUserById(string id);
