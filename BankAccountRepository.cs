@@ -14,10 +14,10 @@ namespace BankAccountManager
         public decimal Balance
         {
             get { return _balance; }
-            private set { _balance = value; }           
+             set { _balance = value; }           
         }
-        public int Id { get;}
-        public string UserId { get;}
+        public int Id { get; set; }
+        public string UserId { get; set; }
         private List<string> _movements = [];
 
         public BankAccountRepository() { }
@@ -135,7 +135,10 @@ namespace BankAccountManager
                 int movementId;
                 string updateQuery = @" UPDATE BankAccount SET Balance = Balance - @Amount WHERE Id = @BankAccountId";
 
-                string insertIntoTransfer = @"INSERT INTO [Transfer] (MovementId, Amount, BankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
+                string insertIntoTransfer = @"INSERT INTO [Transfer] (MovementId, Amount, ToBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
+
+                string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) VALUES (@BankAccountId, 'Transfer', @Date)";
+                string insertIntoTransferTarget = @"INSERT INTO [Transfer] (MovementId, Amount, FromBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
 
                 string query1 = "UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @Id";
 
@@ -151,7 +154,21 @@ namespace BankAccountManager
                     cmd.Parameters.AddWithValue("@Amount", amount);
                     cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
                     cmd.ExecuteNonQuery();
-                }    
+                }
+                using(SqlCommand cmd = new(insertIntoMovementTarget, conn))
+                {
+                    cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
+                    cmd.Parameters.AddWithValue("@Date", DateTime.Now);
+                    cmd.ExecuteNonQuery();
+                    //movementId = (int)cmd.ExecuteScalar();
+                }
+                using (SqlCommand cmd = new(insertIntoTransferTarget, conn))
+                {
+                    cmd.Parameters.AddWithValue("@MovementId", movementId);
+                    cmd.Parameters.AddWithValue("@Amount", amount);
+                    cmd.Parameters.AddWithValue("@BankAccountId", Id);
+                    cmd.ExecuteNonQuery();
+                }
                 using (SqlCommand updateCmd = new SqlCommand(updateQuery, conn))
                 {
                     updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
@@ -185,7 +202,8 @@ namespace BankAccountManager
             d.Amount AS DepositAmount,
             w.Amount AS WithdrawAmount,
             t.Amount AS TransferAmount,
-            t.BankAccountId AS ToBankAccountId
+            t.ToBankAccountId AS ToBankAccountId,
+            t.FromBankAccountId AS FromBankAccountId
             FROM Movement m
             LEFT JOIN Deposit d ON d.MovementId = m.Id
             LEFT JOIN Withdraw w ON w.MovementId = m.Id
@@ -205,7 +223,7 @@ namespace BankAccountManager
                         var title = reader.IsDBNull(reader.GetOrdinal("Title")) ? string.Empty : reader.GetString(reader.GetOrdinal("Title"));
                         var date = reader.IsDBNull(reader.GetOrdinal("MovementDate")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("MovementDate"));
 
-                        string formatted;
+                        string formatted = "";
                         if (!reader.IsDBNull(reader.GetOrdinal("DepositAmount")))
                         {
                             var amount = reader.GetDecimal(reader.GetOrdinal("DepositAmount"));
@@ -219,8 +237,16 @@ namespace BankAccountManager
                         else if (!reader.IsDBNull(reader.GetOrdinal("TransferAmount")))
                         {
                             var amount = reader.GetDecimal(reader.GetOrdinal("TransferAmount"));
-                            var toId = reader.IsDBNull(reader.GetOrdinal("ToBankAccountId")) ? "?" : reader["ToBankAccountId"].ToString();
-                            formatted = $"{date:yyyy-MM-dd HH:mm} - {title} - Transfer {amount:C2} to {toId} (Id:{movementId})";
+                            if (!reader.IsDBNull(reader.GetOrdinal("ToBankAccountId")))
+                            {
+                                var toId = reader.IsDBNull(reader.GetOrdinal("ToBankAccountId")) ? "?" : reader["ToBankAccountId"].ToString();
+                                formatted = $"{date:yyyy-MM-dd HH:mm} - {title} - Transfer {amount:C2} to {toId} (Id:{movementId})";
+                            }
+                            else if (!reader.IsDBNull(reader.GetOrdinal("FromBankAccountId")))
+                            {
+                                var fromId = reader.IsDBNull(reader.GetOrdinal("FromBankAccountId")) ? "?" : reader["FromBankAccountId"].ToString();
+                                formatted = $"{date:yyyy-MM-dd HH:mm} - {title} - Transfer {amount:C2} from {fromId} (Id:{movementId})";
+                            }
                         }
                         else
                         {
@@ -244,13 +270,13 @@ namespace BankAccountManager
         //changing the balance when another bank account transfered money to this
         public void creditAmount(decimal amount)
         {
-            _balance += amount;
+            
         }
 
         //adding the movement when another bank account transfered money to this
         public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
         {
-            this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");
+            
         }
     }
 }

@@ -11,10 +11,10 @@ namespace BankAccountManager
     {
         public decimal Balance
         {
-            get; 
+            get; set;
         }
-        public int Id { get; }
-        public string UserId { get;}
+        public int Id { get; set; }
+        public string UserId { get; set; }
 
         //public List<string> _movements { get; set; }
         
