@@ -132,6 +132,7 @@ namespace BankAccountManager
             {
                 int movementId;
 
+                //insert into table movements for this bank account
                 string insertIntoMovementQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
                 VALUES (@BankAccountId, 'Transfer', @Date)";
                 using (SqlCommand insertCmd = new SqlCommand(insertIntoMovementQuery, conn))
@@ -141,6 +142,7 @@ namespace BankAccountManager
                     movementId = (int)insertCmd.ExecuteScalar();
                 }
 
+                //change the balance of this bank account
                 string updateBalanceQuery = @" UPDATE BankAccount SET Balance = Balance - @Amount WHERE Id = @BankAccountId";
                 using (SqlCommand updateCmd = new SqlCommand(updateBalanceQuery, conn))
                 {
@@ -149,6 +151,7 @@ namespace BankAccountManager
                     updateCmd.ExecuteNonQuery();
                 }
 
+                //insert into table transfer for this bank account
                 string insertIntoTransfer = @"INSERT INTO [Transfer] (MovementId, Amount, ToBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
                 using (SqlCommand cmd = new(insertIntoTransfer, conn))
                 {
@@ -158,6 +161,7 @@ namespace BankAccountManager
                     cmd.ExecuteNonQuery();
                 }
 
+                //insert into table movements for the target bank account
                 string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) VALUES (@BankAccountId, 'Transfer', @Date)";
                 using (SqlCommand cmd = new(insertIntoMovementTarget, conn))
                 {
@@ -166,6 +170,7 @@ namespace BankAccountManager
                     cmd.ExecuteNonQuery();
                 }
 
+                //insert into table trasnfer for the target bank account
                 string insertIntoTransferTarget = @"INSERT INTO [Transfer] (MovementId, Amount, FromBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
                 using (SqlCommand cmd = new(insertIntoTransferTarget, conn))
                 {
@@ -175,6 +180,7 @@ namespace BankAccountManager
                     cmd.ExecuteNonQuery();
                 }
 
+                //change the balance of the target bank account
                 string updateBalanceTargetQuery = "UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @Id";
                 using (SqlCommand updateCmd = new SqlCommand(updateBalanceTargetQuery, conn))
                 {
