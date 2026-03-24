@@ -15,10 +15,10 @@ namespace BankAccountManager
         {
             get { return _balance; }
 
-            set { _balance = value; }
+            private set { _balance = value; }
         }
-        public int Id { get; set; }
-        public string UserId { get; set; }
+        public int Id { get; private set; }
+        public string UserId { get; private set; }
         private List<string> _movements { get; set; } = [];
 
         public FakeBankAccountRepository(string userId)

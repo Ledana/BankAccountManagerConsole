@@ -33,14 +33,9 @@ namespace BankAccountManager
                         reader["FirstName"].ToString(),
                         reader["LastName"].ToString(),
                         reader["UserName"].ToString(),
-                        new BankAccountRepository()
-                        {
-                            UserId = reader["UserId"].ToString() ?? "Not found",
-                            Id = Convert.ToInt32(reader["BankAccountId"]),
-                            Balance = Convert.ToDecimal(reader["Balance"])
-                        }
-
-                    ));
+                        new BankAccountRepository(reader["UserId"].ToString() ?? "Not found", Convert.ToInt32(reader["BankAccountId"]), Convert.ToDecimal(reader["Balance"])))
+                        );
+                        
                 }
             }
             return _users;

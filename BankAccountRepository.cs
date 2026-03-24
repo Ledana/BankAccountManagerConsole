@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,13 +15,18 @@ namespace BankAccountManager
         public decimal Balance
         {
             get { return _balance; }
-             set { _balance = value; }           
+            private set { _balance = value; }           
         }
-        public int Id { get; set; }
-        public string UserId { get; set; }
+        public int Id { get; private set; }
+        public string UserId { get; private set; }
         private List<string> _movements = [];
 
-        public BankAccountRepository() { }
+        public BankAccountRepository(string userId, int id, decimal balance)
+        {
+            UserId = userId;
+            Id = id;
+            _balance = balance;
+        }
 
         public void MakeDeposit(decimal amount, SqlConnection conn)
         {
@@ -69,8 +75,10 @@ namespace BankAccountManager
                 Console.WriteLine("The amount should be positive");
                 return;
             }
+            else if (amount < 50)
+                Console.WriteLine("You cannot withdraw less then 50.00");
 
-            if (amount > _balance)
+            else if (amount > _balance)
                 Console.WriteLine("The amount to withdraw should be less then the balance");
 
             else
@@ -120,6 +128,8 @@ namespace BankAccountManager
                 Console.WriteLine("The amount is bigger than your balance");
                 return;
             }
+            else if(amount < 50)
+                Console.WriteLine("You cannot transfer less then 50.00");
 
             if (bankAccount == null)
                 Console.WriteLine("The userId is not valid");
@@ -194,7 +204,6 @@ namespace BankAccountManager
             _movements.Add($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"Your balance is now {_balance - amount}");
-            
         }
 
         public void GetMovements(SqlConnection conn)

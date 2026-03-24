@@ -11,10 +11,10 @@ namespace BankAccountManager
     {
         public decimal Balance
         {
-            get; set;
+            get; 
         }
-        public int Id { get; set; }
-        public string UserId { get; set; }
+        public int Id { get; }
+        public string UserId { get; }
 
         public void MakeDeposit(decimal amount, SqlConnection conn);
         public void MakeWithdraw(decimal amount, SqlConnection conn);
