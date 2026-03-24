@@ -21,9 +21,9 @@ namespace BankAccountManager
         public string UserId { get; set; }
         private List<string> _movements { get; set; } = [];
 
-        public FakeBankAccountRepository()
+        public FakeBankAccountRepository(string userId)
         {
-            
+            UserId = userId;
         }
 
         public void MakeDeposit(decimal amount, SqlConnection conn)

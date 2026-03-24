@@ -10,6 +10,8 @@ namespace BankAccountManager
         {
             string connectionString = "Server=LAPTOP-VIIQV46I;Database=Users;Trusted_Connection=True;Encrypt=False;";
 
+           
+
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
@@ -18,8 +20,9 @@ namespace BankAccountManager
                     //var allUsers = GetRepository(new UserRepository(conn));
                     var allUsers = GetRepository(new FakeUsersRepository());
                     var users = allUsers.GetAllUsers();
+                                       
 
-                    string? username = "";
+                   string ? username = "";
 
                     Console.WriteLine("Wellcome to our bank app");
                     while (username != "exit")
