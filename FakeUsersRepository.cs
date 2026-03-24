@@ -1,7 +1,7 @@
 ﻿
 namespace BankAccountManager
 {
-    public class FakeUsersRepository : User, IUsersRepository
+    public class FakeUsersRepository : IUsersRepository
     {
         private List<User> _users = [];
         public FakeUsersRepository()
@@ -76,7 +76,7 @@ namespace BankAccountManager
             User? user = _users.FirstOrDefault(a => a.UserId == userId);
             if (user == null)
                 return false;
-            return user.Pasword == password;
+            return user.Password == password;
         }
 
         public User? FindUserById(string id)

@@ -18,6 +18,7 @@ namespace BankAccountManager
         private List<User> _users = [];
         public List<User> GetAllUsers()
         {
+
             string query = "SELECT ac.UserId, ac.UserName, ud.FirstName, ud.LastName, ba.Id AS BankAccountId, " +
                 "ba.Balance FROM AccountCredentials ac JOIN UserDetails ud ON ud.UserId = " +
                 "ac.UserId JOIN BankAccount ba ON ba.UserId = ac.UserId";
@@ -27,19 +28,19 @@ namespace BankAccountManager
                 while (reader.Read())
                 {
                     _users.Add(new User
-                    {
-                        UserId = reader["UserId"].ToString(),
-                        FirstName = reader["FirstName"].ToString(),
-                        LastName = reader["LastName"].ToString(),
-                        UserName = reader["UserName"].ToString(),
-                        GetBankAccountRepository = new BankAccountRepository()
+                    (
+                        reader["UserId"].ToString(),
+                        reader["FirstName"].ToString(),
+                        reader["LastName"].ToString(),
+                        reader["UserName"].ToString(),
+                        new BankAccountRepository()
                         {
                             UserId = reader["UserId"].ToString() ?? "Not found",
                             Id = Convert.ToInt32(reader["BankAccountId"]),
                             Balance = Convert.ToDecimal(reader["Balance"])
                         }
 
-                    });
+                    ));
                 }
             }
             return _users;

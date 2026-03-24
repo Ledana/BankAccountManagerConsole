@@ -17,8 +17,8 @@ namespace BankAccountManager
                 conn.Open();
                 try
                 {
-                    //var allUsers = GetRepository(new UserRepository(conn));
-                    var allUsers = GetRepository(new FakeUsersRepository());
+                    var allUsers = GetRepository(new UserRepository(conn));
+                    //var allUsers = GetRepository(new FakeUsersRepository());
                     var users = allUsers.GetAllUsers();
                                        
 

@@ -189,7 +189,8 @@ namespace BankAccountManager
                     updateCmd.ExecuteNonQuery();
                 }
 
-
+                //_balance -= amount;
+                //bankAccount.creditAmount(amount);
                 Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
                 Console.WriteLine($"Your balance is now {_balance - amount}");
             }
