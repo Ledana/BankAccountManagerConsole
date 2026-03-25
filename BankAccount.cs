@@ -22,8 +22,12 @@ namespace BankAccountManager
                 UserId = userId;
                 _balance = initial;
             }
+        public BankAccount(string userId)
+        {
+            UserId = userId;
+        }
 
-            public bool TryDeposit(decimal amount)
+        public bool TryDeposit(decimal amount)
             {
                 if (amount <= 50) return false;
                 _balance += amount;

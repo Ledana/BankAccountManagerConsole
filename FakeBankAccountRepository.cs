@@ -25,24 +25,28 @@ namespace BankAccountManager
         public FakeBankAccountRepository(string userId)
         {
             UserId = userId;
-            _bankAccount = new();
+            _bankAccount = new(userId);
         }
 
-        public void MakeDeposit(decimal amount, SqlConnection conn)
+        public bool MakeDeposit(decimal amount, SqlConnection conn, out decimal newBalance)
         {
             //adding a fake time for testing
             var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
-            if (amount < 0)
-                Console.WriteLine("The amount should be positive");
+            //if (amount < 0)
+            //    Console.WriteLine("The amount should be positive");
 
-            else if (amount == 0)
-                return;
-            else
+            //else if (amount == 0)
+            //    return;
+            if (_bankAccount.TryDeposit(amount))
             {
-                _balance += amount;
-                Console.WriteLine($"You deposidet {amount} and your balance now is {_balance}");
+                newBalance = _balance + amount;
+                _balance = newBalance;
+                
                 _movements.Add($"You deposited {amount} in {fakeTime.GetUtcNow().DateTime}");
+                return true;
             }
+            newBalance = _balance;
+            return false;
         }
 
         public void MakeWithdraw(decimal amount, SqlConnection conn)

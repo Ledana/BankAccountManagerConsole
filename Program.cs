@@ -36,8 +36,8 @@ namespace BankAccountManager
                         //in the database or the fake repository with hard coded users
                         //everytime a user logs out and the user is asked for username to log in, the list
                         //of allusers is updated with the latest change from the database
-                        //var allUsers = GetRepository(new UserRepository(conn));
                         
+                        //var allUsers = GetRepository(new UserRepository(conn));
                         users = allUsers.GetAllUsers();
 
                         var user = allUsers.FindUserByUsername(username);
@@ -134,11 +134,17 @@ namespace BankAccountManager
             Console.WriteLine("Put the amount you want to deposit");
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
-            {   
-                user.GetBankAccountRepository.MakeDeposit(amount, conn);
+            {
+                if(user.GetBankAccountRepository.MakeDeposit(amount, conn, out decimal newBalance))
+                    Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
+                else
+                    Console.WriteLine("The amount you inserted can not be deposited");
             }
             else
-                Console.WriteLine("The amount is not in the right format");    
+            {
+                Console.WriteLine("The amount is not in the right format");
+            }
+           
         }
         public static void Withdraw(User user, SqlConnection conn)
         {
