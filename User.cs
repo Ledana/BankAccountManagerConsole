@@ -12,8 +12,8 @@ namespace BankAccountManager
         internal string Password {  get; private set; }
         private static int _count = 0;
         private string _userId = "123456789";
-        public IBankAccountRepository GetBankAccountRepository { get; set; }
-        public User(string userId, string firstName, string lastName, string userName, IBankAccountRepository bankAccountRepository)
+        public IBankAccountServices GetBankAccountRepository { get; set; }
+        public User(string userId, string firstName, string lastName, string userName, IBankAccountServices bankAccountRepository)
         {
             FirstName = firstName;
             LastName = lastName;
@@ -33,7 +33,7 @@ namespace BankAccountManager
             UserId = GenerateUserId();
             UserName = GenerateUserName(lastName, UserId);
 
-            GetBankAccountRepository = new FakeBankAccountRepository(UserId);
+            GetBankAccountRepository = new FakeBankAccountServices(UserId);
         }
 
         private string GenerateUserId()

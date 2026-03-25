@@ -19,6 +19,7 @@ namespace BankAccountManager
                 try
                 {
                    string ? username = "";
+                    //var allUsers = GetRepository(new UserRepository(conn));
                     var allUsers = GetRepository(new FakeUsersRepository());
                     var users = allUsers.GetAllUsers();
 
@@ -35,9 +36,8 @@ namespace BankAccountManager
                         //allusers choose if you want to work with the real repository which has access
                         //in the database or the fake repository with hard coded users
                         //everytime a user logs out and the user is asked for username to log in, the list
-                        //of allusers is updated with the latest change from the database
+                        //of users is updated with the latest change from the database
                         
-                        //var allUsers = GetRepository(new UserRepository(conn));
                         users = allUsers.GetAllUsers();
 
                         var user = allUsers.FindUserByUsername(username);
@@ -54,7 +54,7 @@ namespace BankAccountManager
                                     if (allUsers.ValidatePassword(user.UserId, username))
                                     {
                                         Console.WriteLine($"Wellcome {user.FirstName} {user.LastName}");
-                                        Console.WriteLine($"You balance is: {user.GetBankAccountRepository.Balance:F2}\n");
+                                        Console.WriteLine($"You balance is: {user.GetBankAccountRepository.GetBalance():F2}\n");
                                         break;
                                     }
                                     //if the user doesnt remember password can exit the app

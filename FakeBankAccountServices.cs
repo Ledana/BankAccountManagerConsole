@@ -8,21 +8,15 @@ using System.Threading.Tasks;
 
 namespace BankAccountManager
 {
-    public class FakeBankAccountRepository : IBankAccountRepository
+    public class FakeBankAccountServices : IBankAccountServices
     {
         private decimal _balance;
-        public decimal Balance
-        {
-            get { return _balance; }
-
-            private set { _balance = value; }
-        }
         public int Id { get; private set; }
         public string UserId { get; private set; }
         private List<string> _movements { get; set; } = [];
         private BankAccount _bankAccount;
 
-        public FakeBankAccountRepository(string userId)
+        public FakeBankAccountServices(string userId)
         {
             UserId = userId;
             _bankAccount = new(userId);
@@ -32,15 +26,10 @@ namespace BankAccountManager
         {
             //adding a fake time for testing
             var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
-            //if (amount < 0)
-            //    Console.WriteLine("The amount should be positive");
 
-            //else if (amount == 0)
-            //    return;
             if (_bankAccount.TryDeposit(amount))
             {
-                newBalance = _balance + amount;
-                _balance = newBalance;
+                newBalance = _bankAccount.Balance;
                 
                 _movements.Add($"You deposited {amount} in {fakeTime.GetUtcNow().DateTime}");
                 return true;
@@ -70,7 +59,7 @@ namespace BankAccountManager
             }
         }
 
-        public void TransferMoney(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn)
+        public void TransferMoney(IBankAccountServices bankAccount, decimal amount, SqlConnection conn)
         {
             //adding a fake time for testing
             var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
@@ -125,9 +114,14 @@ namespace BankAccountManager
         }
 
         //adding to movements when another bank account transfers money to this
-        public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
+        public void addMovement(IBankAccountServices bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
         {
             this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");
+        }
+
+        public decimal GetBalance()
+        {
+            return _balance;
         }
     }
 }

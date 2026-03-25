@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BankAccountManager
 {
-    public class BankAccountRepository : IBankAccountRepository
+    public class BankAccountRepository : IBankAccountServices
     {
         private decimal _balance;
         public decimal Balance
@@ -34,12 +34,6 @@ namespace BankAccountManager
 
         public bool MakeDeposit(decimal amount, SqlConnection conn, out decimal newBalance)
         {
-            //if (amount <= 0)
-            //    Console.WriteLine("The amount should be positive");
-
-            //else if (amount < 50)
-            //    Console.WriteLine("The amount should be larger or equal to 50.00");
-            //else
             if (_bankAccount.TryDeposit(amount))
             {
                 string insertQuery = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
@@ -126,7 +120,7 @@ namespace BankAccountManager
             }
         }
 
-        public void TransferMoney(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn)
+        public void TransferMoney(IBankAccountServices bankAccount, decimal amount, SqlConnection conn)
         { 
             if (amount <= 0)
             {
@@ -301,9 +295,14 @@ namespace BankAccountManager
         }
 
         //adding the movement when another bank account transfered money to this
-        public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
+        public void addMovement(IBankAccountServices bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
         {
             
+        }
+
+        public decimal GetBalance()
+        {
+            return _balance;
         }
     }
 }

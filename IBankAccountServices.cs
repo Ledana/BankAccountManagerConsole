@@ -7,23 +7,24 @@ using System.Threading.Tasks;
 
 namespace BankAccountManager
 {
-    public interface IBankAccountRepository
+    public interface IBankAccountServices
     {
-        public decimal Balance
-        {
-            get; 
-        }
+        //public decimal Balance
+        //{
+        //    get; 
+        //}
         public int Id { get; }
         public string UserId { get; }
 
         public bool MakeDeposit(decimal amount, SqlConnection conn, out decimal newBalance);
         public void MakeWithdraw(decimal amount, SqlConnection conn);
+        public decimal GetBalance();
 
-        public void TransferMoney(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn);
+        public void TransferMoney(IBankAccountServices bankAccount, decimal amount, SqlConnection conn);
         public void GetMovements(SqlConnection conn);
         //a method to change the balance of another bank account
         public void creditAmount(decimal amount);
         //a method to add to movements of another bank account
-        public void addMovement(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn, DateTime dateTime);
+        public void addMovement(IBankAccountServices bankAccount, decimal amount, SqlConnection conn, DateTime dateTime);
     }
 }
