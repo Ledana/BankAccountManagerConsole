@@ -24,18 +24,28 @@ namespace BankAccountManager
 
         public bool MakeDeposit(decimal amount, out decimal newBalance)
         {
-            //adding a fake time for testing
+            ////adding a fake time for testing
             var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
 
-            if (_bankAccount.TryDeposit(amount))
+            //if (_bankAccount.TryDeposit(amount))
+            //{
+            //    newBalance = _bankAccount.Balance;
+
+            //    _movements.Add($"You deposited {amount} in {fakeTime.GetUtcNow().DateTime}");
+            //    return true;
+            //}
+            //newBalance = _balance;
+            //return false;
+
+            if (amount < 50)
             {
-                newBalance = _bankAccount.Balance;
-                
-                _movements.Add($"You deposited {amount} in {fakeTime.GetUtcNow().DateTime}");
-                return true;
+                newBalance = _balance;
+                return false;
             }
+            _balance += amount;
             newBalance = _balance;
-            return false;
+            _movements.Add($"{fakeTime.GetUtcNow().DateTime:o} Deposit {amount:C2}");
+            return true;
         }
 
         public void MakeWithdraw(decimal amount)

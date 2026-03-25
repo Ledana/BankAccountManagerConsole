@@ -287,13 +287,13 @@ namespace BankAccountManager
         //changing the balance when another bank account transfered money to this
         public void creditAmount(decimal amount)
         {
-            
+            _balance += amount;
         }
 
         //adding the movement when another bank account transfered money to this
         public void addMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime)
         {
-            
+            this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");
         }
 
         public decimal GetBalance()
