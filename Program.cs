@@ -19,6 +19,8 @@ namespace BankAccountManager
                 try
                 {
                    string ? username = "";
+                    var allUsers = GetRepository(new FakeUsersRepository());
+                    var users = allUsers.GetAllUsers();
 
                     Console.WriteLine("Wellcome to our bank app");
                     while (username != "exit")
@@ -34,9 +36,9 @@ namespace BankAccountManager
                         //in the database or the fake repository with hard coded users
                         //everytime a user logs out and the user is asked for username to log in, the list
                         //of allusers is updated with the latest change from the database
-                        var allUsers = GetRepository(new UserRepository(conn));
-                        //var allUsers = GetRepository(new FakeUsersRepository());
-                        var users = allUsers.GetAllUsers();
+                        //var allUsers = GetRepository(new UserRepository(conn));
+                        
+                        users = allUsers.GetAllUsers();
 
                         var user = allUsers.FindUserByUsername(username);
 

@@ -20,10 +20,12 @@ namespace BankAccountManager
         public int Id { get; private set; }
         public string UserId { get; private set; }
         private List<string> _movements { get; set; } = [];
+        private BankAccount _bankAccount;
 
         public FakeBankAccountRepository(string userId)
         {
             UserId = userId;
+            _bankAccount = new();
         }
 
         public void MakeDeposit(decimal amount, SqlConnection conn)

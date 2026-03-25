@@ -16,7 +16,7 @@ namespace BankAccountManager
         public int Id { get; }
         public string UserId { get; }
 
-        public void MakeDeposit(decimal amount, SqlConnection conn);
+        public bool MakeDeposit(decimal amount, SqlConnection conn, out decimal newBalance);
         public void MakeWithdraw(decimal amount, SqlConnection conn);
 
         public void TransferMoney(IBankAccountRepository bankAccount, decimal amount, SqlConnection conn);

@@ -21,21 +21,26 @@ namespace BankAccountManager
         public string UserId { get; private set; }
         private List<string> _movements = [];
 
+        private BankAccount _bankAccount;
+
         public BankAccountRepository(string userId, int id, decimal balance)
         {
             UserId = userId;
             Id = id;
             _balance = balance;
+
+            _bankAccount = new(id, userId);
         }
 
-        public void MakeDeposit(decimal amount, SqlConnection conn)
+        public bool MakeDeposit(decimal amount, SqlConnection conn, out decimal newBalance)
         {
-            if (amount <= 0)
-                Console.WriteLine("The amount should be positive");
+            //if (amount <= 0)
+            //    Console.WriteLine("The amount should be positive");
 
-            else if (amount < 50)
-                Console.WriteLine("The amount should be larger or equal to 50.00");
-            else
+            //else if (amount < 50)
+            //    Console.WriteLine("The amount should be larger or equal to 50.00");
+            //else
+            if (_bankAccount.TryDeposit(amount))
             {
                 string insertQuery = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
                 VALUES (@BankAccountId, 'Deposit', @Date)";
@@ -43,7 +48,7 @@ namespace BankAccountManager
                 string insertIntoDeposit = @"INSERT INTO Deposit (MovementId, Amount) VALUES (@MovementId, @Amount)";
                 string updateQuery = @"UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @BankAccountId";
 
-                using (SqlCommand insertCmd = new (insertQuery, conn))
+                using (SqlCommand insertCmd = new(insertQuery, conn))
                 {
                     insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
                     insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
@@ -63,9 +68,14 @@ namespace BankAccountManager
                     updateCmd.ExecuteNonQuery();
                 }
 
-                _balance += amount;
-                Console.WriteLine($"You deposidet {amount} and your balance now is {_balance}");
-                
+                newBalance = _balance + amount;
+                return true;
+
+            }
+            else
+            {
+                newBalance = _balance;
+                return false;
             }
         }
         public void MakeWithdraw(decimal amount, SqlConnection conn)
