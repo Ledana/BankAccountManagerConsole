@@ -42,6 +42,12 @@ namespace BankAccountManager
                 _movements.Add($"{DateTime.UtcNow:o} Withdraw {amount:C2}");
                 return true;
             }
-
+        public bool TryTransfer(string targetId, decimal amount)
+        {
+            if (amount > _balance || amount <= 50) return false;
+            _balance -= amount;
+            _movements.Add($"{DateTime.UtcNow:o} Transfer {amount:C2} to {targetId}");
+            return true;
+        }
     }
 }

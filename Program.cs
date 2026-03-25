@@ -19,8 +19,8 @@ namespace BankAccountManager
                 try
                 {
                    string ? username = "";
-                    //var allUsers = GetRepository(new UserRepository(conn));
-                    var allUsers = GetRepository(new FakeUsersRepository());
+                    var allUsers = GetRepository(new UserRepository(conn));
+                    //var allUsers = GetRepository(new FakeUsersRepository());
                     var users = allUsers.GetAllUsers();
 
                     Console.WriteLine("Wellcome to our bank app");
@@ -106,7 +106,7 @@ namespace BankAccountManager
                             }
                             if (input == "4")
                             {
-                                user.GetBankAccountRepository.GetMovements(conn);
+                                user.GetBankAccountRepository.GetMovements();
                             }
                             if (input == "5")
                                 break;
@@ -135,7 +135,7 @@ namespace BankAccountManager
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
             {
-                if(user.GetBankAccountRepository.MakeDeposit(amount, conn, out decimal newBalance))
+                if(user.GetBankAccountRepository.MakeDeposit(amount, out decimal newBalance))
                     Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
                 else
                     Console.WriteLine("The amount you inserted can not be deposited");
@@ -151,7 +151,7 @@ namespace BankAccountManager
             Console.WriteLine("Put the amount you want to withdraw");
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
-                user.GetBankAccountRepository.MakeWithdraw(amount, conn);
+                user.GetBankAccountRepository.MakeWithdraw(amount);
             else
                 Console.WriteLine("The amount is not in the right format");
         }
@@ -181,7 +181,7 @@ namespace BankAccountManager
                 return;
             }
                 
-            user.GetBankAccountRepository.TransferMoney(target.GetBankAccountRepository, amount, conn);
+            user.GetBankAccountRepository.TransferMoney(target.GetBankAccountRepository, amount);
         
         }
         public static void ChooseAction()

@@ -9,30 +9,26 @@ using System.Threading.Tasks;
 
 namespace BankAccountManager
 {
-    public class BankAccountRepository : IBankAccountServices
+    public class BankAccountServices : IBankAccountServices
     {
         private decimal _balance;
-        public decimal Balance
-        {
-            get { return _balance; }
-            private set { _balance = value; }           
-        }
         public int Id { get; private set; }
         public string UserId { get; private set; }
         private List<string> _movements = [];
 
         private BankAccount _bankAccount;
+        private readonly SqlConnection _conn;
 
-        public BankAccountRepository(string userId, int id, decimal balance)
+        public BankAccountServices(string userId, int id, decimal balance, SqlConnection conn)
         {
             UserId = userId;
             Id = id;
             _balance = balance;
-
             _bankAccount = new(id, userId);
+            _conn = conn;
         }
 
-        public bool MakeDeposit(decimal amount, SqlConnection conn, out decimal newBalance)
+        public bool MakeDeposit(decimal amount, out decimal newBalance)
         {
             if (_bankAccount.TryDeposit(amount))
             {
@@ -42,20 +38,20 @@ namespace BankAccountManager
                 string insertIntoDeposit = @"INSERT INTO Deposit (MovementId, Amount) VALUES (@MovementId, @Amount)";
                 string updateQuery = @"UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @BankAccountId";
 
-                using (SqlCommand insertCmd = new(insertQuery, conn))
+                using (SqlCommand insertCmd = new(insertQuery, _conn))
                 {
                     insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
                     insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
                     MovementId = (int)insertCmd.ExecuteScalar();
 
                 }
-                using (SqlCommand cmd = new(insertIntoDeposit, conn))
+                using (SqlCommand cmd = new(insertIntoDeposit, _conn))
                 {
                     cmd.Parameters.AddWithValue("@MovementId", MovementId);
                     cmd.Parameters.AddWithValue("@Amount", amount);
                     cmd.ExecuteNonQuery();
                 }
-                using (SqlCommand updateCmd = new SqlCommand(updateQuery, conn))
+                using (SqlCommand updateCmd = new SqlCommand(updateQuery, _conn))
                 {
                     updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
                     updateCmd.Parameters.AddWithValue("@Amount", amount);
@@ -72,7 +68,7 @@ namespace BankAccountManager
                 return false;
             }
         }
-        public void MakeWithdraw(decimal amount, SqlConnection conn)
+        public void MakeWithdraw(decimal amount)
         {
             if (amount <= 0)
             {
@@ -95,21 +91,21 @@ namespace BankAccountManager
 
                 string updateQuery = @" UPDATE BankAccount SET Balance = Balance - @Amount WHERE Id = @BankAccountId";
 
-                using (SqlCommand insertCmd = new SqlCommand(insertQuery, conn))
+                using (SqlCommand insertCmd = new SqlCommand(insertQuery, _conn))
                 {
                     insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
                     insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
                     movementId = (int)insertCmd.ExecuteScalar();
                 }
   
-                using (SqlCommand cmd = new(insertIntoWithdraw, conn))
+                using (SqlCommand cmd = new(insertIntoWithdraw, _conn))
                 {
                     cmd.Parameters.AddWithValue("@MovementId", movementId);
                     cmd.Parameters.AddWithValue("@Amount", amount);
                     cmd.ExecuteNonQuery();
                 }
 
-                using (SqlCommand updateCmd = new SqlCommand(updateQuery, conn))
+                using (SqlCommand updateCmd = new SqlCommand(updateQuery, _conn))
                 {
                     updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
                     updateCmd.Parameters.AddWithValue("@Amount", amount);
@@ -120,7 +116,7 @@ namespace BankAccountManager
             }
         }
 
-        public void TransferMoney(IBankAccountServices bankAccount, decimal amount, SqlConnection conn)
+        public void TransferMoney(IBankAccountServices bankAccount, decimal amount)
         { 
             if (amount <= 0)
             {
@@ -149,7 +145,7 @@ namespace BankAccountManager
                 //insert into table movements for this bank account
                 string insertIntoMovementQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
                 VALUES (@BankAccountId, 'Transfer', @Date)";
-                using (SqlCommand insertCmd = new SqlCommand(insertIntoMovementQuery, conn))
+                using (SqlCommand insertCmd = new SqlCommand(insertIntoMovementQuery, _conn))
                 {
                     insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
                     insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
@@ -158,7 +154,7 @@ namespace BankAccountManager
 
                 //change the balance of this bank account
                 string updateBalanceQuery = @" UPDATE BankAccount SET Balance = Balance - @Amount WHERE Id = @BankAccountId";
-                using (SqlCommand updateCmd = new SqlCommand(updateBalanceQuery, conn))
+                using (SqlCommand updateCmd = new SqlCommand(updateBalanceQuery, _conn))
                 {
                     updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
                     updateCmd.Parameters.AddWithValue("@Amount", amount);
@@ -167,7 +163,7 @@ namespace BankAccountManager
 
                 //insert into table transfer for this bank account
                 string insertIntoTransfer = @"INSERT INTO [Transfer] (MovementId, Amount, ToBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
-                using (SqlCommand cmd = new(insertIntoTransfer, conn))
+                using (SqlCommand cmd = new(insertIntoTransfer, _conn))
                 {
                     cmd.Parameters.AddWithValue("@MovementId", movementId);
                     cmd.Parameters.AddWithValue("@Amount", amount);
@@ -177,7 +173,7 @@ namespace BankAccountManager
 
                 //insert into table movements for the target bank account
                 string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id VALUES (@BankAccountId, 'Transfer', @Date)";
-                using (SqlCommand cmd = new(insertIntoMovementTarget, conn))
+                using (SqlCommand cmd = new(insertIntoMovementTarget, _conn))
                 {
                     cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
                     cmd.Parameters.AddWithValue("@Date", DateTime.Now);
@@ -186,7 +182,7 @@ namespace BankAccountManager
 
                 //insert into table trasnfer for the target bank account
                 string insertIntoTransferTarget = @"INSERT INTO [Transfer] (MovementId, Amount, FromBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
-                using (SqlCommand cmd = new(insertIntoTransferTarget, conn))
+                using (SqlCommand cmd = new(insertIntoTransferTarget, _conn))
                 {
                     cmd.Parameters.AddWithValue("@MovementId", targetMovementId);
                     cmd.Parameters.AddWithValue("@Amount", amount);
@@ -196,7 +192,7 @@ namespace BankAccountManager
 
                 //change the balance of the target bank account
                 string updateBalanceTargetQuery = "UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @Id";
-                using (SqlCommand updateCmd = new SqlCommand(updateBalanceTargetQuery, conn))
+                using (SqlCommand updateCmd = new SqlCommand(updateBalanceTargetQuery, _conn))
                 {
                     updateCmd.Parameters.AddWithValue("@Id", bankAccount.Id);
                     updateCmd.Parameters.AddWithValue("@Amount", amount);
@@ -210,11 +206,11 @@ namespace BankAccountManager
                 Console.WriteLine($"Your balance is now {_balance - amount}");
         }
 
-        public void GetMovements(SqlConnection conn)
+        public void GetMovements()
         {
-            ArgumentNullException.ThrowIfNull(conn);
+            ArgumentNullException.ThrowIfNull(_conn);
             if (Id == 0) throw new InvalidOperationException("BankAccount.Id must be set before loading movements.");
-            if (conn.State != System.Data.ConnectionState.Open)
+            if (_conn.State != System.Data.ConnectionState.Open)
                 throw new InvalidOperationException("The supplied SqlConnection must be open.");
 
             _movements.Clear();
@@ -232,7 +228,7 @@ namespace BankAccountManager
             WHERE m.BankAccountId = @BankAccountId
             ORDER BY m.[Date] DESC";
 
-            using (var cmd = new SqlCommand(sql, conn))
+            using (var cmd = new SqlCommand(sql, _conn))
             {
                 cmd.Parameters.AddWithValue("@BankAccountId", Id);
 
@@ -295,7 +291,7 @@ namespace BankAccountManager
         }
 
         //adding the movement when another bank account transfered money to this
-        public void addMovement(IBankAccountServices bankAccount, decimal amount, SqlConnection conn, DateTime dateTime)
+        public void addMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime)
         {
             
         }
@@ -304,5 +300,6 @@ namespace BankAccountManager
         {
             return _balance;
         }
+
     }
 }

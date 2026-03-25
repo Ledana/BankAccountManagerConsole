@@ -19,7 +19,6 @@ namespace BankAccountManager
             LastName = lastName;
             UserId = userId;
             UserName = userName;
-            //Password = password;
             GetBankAccountRepository = bankAccountRepository;
         }
 

@@ -9,22 +9,18 @@ namespace BankAccountManager
 {
     public interface IBankAccountServices
     {
-        //public decimal Balance
-        //{
-        //    get; 
-        //}
         public int Id { get; }
         public string UserId { get; }
 
-        public bool MakeDeposit(decimal amount, SqlConnection conn, out decimal newBalance);
-        public void MakeWithdraw(decimal amount, SqlConnection conn);
+        public bool MakeDeposit(decimal amount,  out decimal newBalance);
+        public void MakeWithdraw(decimal amount);
         public decimal GetBalance();
 
-        public void TransferMoney(IBankAccountServices bankAccount, decimal amount, SqlConnection conn);
-        public void GetMovements(SqlConnection conn);
+        public void TransferMoney(IBankAccountServices bankAccount, decimal amount);
+        public void GetMovements();
         //a method to change the balance of another bank account
         public void creditAmount(decimal amount);
         //a method to add to movements of another bank account
-        public void addMovement(IBankAccountServices bankAccount, decimal amount, SqlConnection conn, DateTime dateTime);
+        public void addMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime);
     }
 }

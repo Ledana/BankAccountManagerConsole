@@ -33,7 +33,7 @@ namespace BankAccountManager
                         reader["FirstName"].ToString(),
                         reader["LastName"].ToString(),
                         reader["UserName"].ToString(),
-                        new BankAccountRepository(reader["UserId"].ToString() ?? "Not found", Convert.ToInt32(reader["BankAccountId"]), Convert.ToDecimal(reader["Balance"])))
+                        new BankAccountServices(reader["UserId"].ToString() ?? "Not found", Convert.ToInt32(reader["BankAccountId"]), Convert.ToDecimal(reader["Balance"]), _conn))
                         );
                         
                 }
