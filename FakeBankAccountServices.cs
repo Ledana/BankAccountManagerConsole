@@ -14,7 +14,6 @@ namespace BankAccountManager
         public int Id { get; private set; }
         public string UserId { get; private set; }
         private List<string> _movements { get; set; } = [];
-
         public FakeBankAccountServices(string userId)
         {
             UserId = userId;

@@ -11,11 +11,9 @@ namespace BankAccountManager
     {
         public int Id { get; }
         public string UserId { get; }
-
         public bool MakeDeposit(decimal amount,  out decimal newBalance);
         public bool MakeWithdraw(decimal amount, out decimal newBalance);
         public decimal GetBalance();
-
         public bool TransferMoney(IBankAccountServices bankAccount, decimal amount, out decimal newBalance);
         public void GetMovements();
         //a method to change the balance of another bank account

@@ -11,14 +11,15 @@ namespace BankAccountManager
         {
             string connectionString = "Server=LAPTOP-VIIQV46I;Database=Users;Trusted_Connection=True;Encrypt=False;";
 
-           
-
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
                 try
                 {
-                   string ? username = "";
+                   string? username = "";
+                    //allusers choose if you want to work with the real repository which has access
+                    //in the database or the fake repository with hard coded users
+
                     //var allUsers = GetRepository(new UserRepository(conn));
                     var allUsers = GetRepository(new FakeUsersRepository());
                     var users = allUsers.GetAllUsers();
@@ -33,8 +34,7 @@ namespace BankAccountManager
                             Console.WriteLine("The username is not in the right format");
                             continue;
                         }
-                        //allusers choose if you want to work with the real repository which has access
-                        //in the database or the fake repository with hard coded users
+                        
                         //everytime a user logs out and the user is asked for username to log in, the list
                         //of users is updated with the latest change from the database
                         
@@ -70,17 +70,11 @@ namespace BankAccountManager
                         }
                         else
                         {
-                            Console.WriteLine("The username is not in the right format");
+                            Console.WriteLine("The user could not be found try again");
                             continue;
                         }
 
                         if (username == "exit") break;
-
-                        if (user == null)
-                        {
-                            Console.WriteLine("Account could not be found, try another username");
-                            continue;
-                        }
 
                         string? input = "";
                         while (input != "5")
@@ -94,15 +88,15 @@ namespace BankAccountManager
                             }
                             if (input == "1")
                             {
-                                Deposit(user, conn);
+                                Deposit(user);
                             }
                             if (input == "2")
                             {
-                                Withdraw(user, conn);
+                                Withdraw(user);
                             }
                             if (input == "3")
                             {
-                                Transfer(allUsers, user, conn);
+                                Transfer(allUsers, user);
                             }
                             if (input == "4")
                             {
@@ -128,7 +122,7 @@ namespace BankAccountManager
         {
             return repository;
         }
-        public static void Deposit(User user, SqlConnection conn)
+        public static void Deposit(User user)
         {
             
             Console.WriteLine("Put the amount you want to deposit");
@@ -146,7 +140,7 @@ namespace BankAccountManager
             }
            
         }
-        public static void Withdraw(User user, SqlConnection conn)
+        public static void Withdraw(User user)
         {
             Console.WriteLine("Put the amount you want to withdraw");
 
@@ -160,9 +154,8 @@ namespace BankAccountManager
             else
                 Console.WriteLine("The amount is not in the right format");
         }
-        public static void Transfer(IUsersRepository allUsers, User user, SqlConnection conn)
+        public static void Transfer(IUsersRepository allUsers, User user)
         {
-            var users = allUsers.GetAllUsers();
             Console.WriteLine("Put the userId you want to transfer to");
             string? targetId = Console.ReadLine();
             if (targetId == null)
@@ -176,7 +169,7 @@ namespace BankAccountManager
                 return;
             }
 
-            User target = allUsers.FindUserById(targetId);
+            User? target = allUsers.FindUserById(targetId);
 
             if (target == null)
             {

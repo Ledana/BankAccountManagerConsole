@@ -15,7 +15,6 @@ namespace BankAccountManager
         public int Id { get; private set; }
         public string UserId { get; private set; }
         private List<string> _movements = [];
-
         private readonly SqlConnection _conn;
 
         public BankAccountServices(string userId, int id, decimal balance, SqlConnection conn)
