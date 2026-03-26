@@ -34,19 +34,38 @@ namespace BankAccountManager
                         reader["LastName"].ToString(),
                         reader["UserName"].ToString(),
                         new BankAccountServices(new BankAccount(reader["UserId"].ToString() ?? "Not found", Convert.ToInt32(reader["BankAccountId"]), Convert.ToDecimal(reader["Balance"])), _conn))
-                        //new BankAccountServices(reader["UserId"].ToString() ?? "Not found", Convert.ToInt32(reader["BankAccountId"]), Convert.ToDecimal(reader["Balance"]), _conn))
                         );
                         
                 }
             }
             return _users;
         }
+        public void CreateUser(string userId, string username, string password)
+        {
+            string hashedPassword = PasswordHasher.HashPassword(password);
+            string query = "INSERT INTO AccountCredentials (UserId, UseName, Password)" +
+                "VALUES (@userId, @username, @password)";
+            using (SqlCommand cmd = new(query, _conn))
+            {
+                cmd.Parameters.AddWithValue("@userId", userId);
+                cmd.Parameters.AddWithValue("@username", username);
+                cmd.Parameters.AddWithValue("@password", hashedPassword);
+                cmd.ExecuteNonQuery();
+            }
+        }
         public bool ValidatePassword(string userId, string password)
         {
+            //string query = "SELECT Password FROM AccountCredentials WHERE UserId = @userId";
             string query = "SELECT COUNT(*) FROM AccountCredentials WHERE UserId = @userId AND Password = @password";
             using (SqlCommand cmd = new SqlCommand(query, _conn))
             {
                 cmd.Parameters.AddWithValue("@userId", userId);
+                //var storedHash = cmd.ExecuteScalar()?.ToString();
+
+                //if (string.IsNullOrEmpty(storedHash))
+                    //return false;
+                //return PasswordHasher.VerifyPassword(password, storedHash);
+                
                 cmd.Parameters.AddWithValue("@password", password);
                 int count = (int)cmd.ExecuteScalar();
                 return count > 0;

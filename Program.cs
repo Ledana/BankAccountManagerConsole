@@ -155,7 +155,7 @@ namespace BankAccountManager
             else
                 Console.WriteLine("The amount is not in the right format");
         }
-        //transfer method requeries the list of all users in which can transfer and the user to make the transfer
+        //transfer method requeries the list of all users in which we can transfer and the user to make the transfer
         public static void Transfer(IUsersRepository allUsers, User user)
         {
             Console.WriteLine("Put the userId you want to transfer to");
