@@ -16,7 +16,6 @@ namespace BankAccountManager
         public string UserId { get; private set; }
         private List<string> _movements = [];
 
-        private BankAccount _bankAccount;
         private readonly SqlConnection _conn;
 
         public BankAccountServices(string userId, int id, decimal balance, SqlConnection conn)
@@ -24,13 +23,17 @@ namespace BankAccountManager
             UserId = userId;
             Id = id;
             _balance = balance;
-            _bankAccount = new(id, userId);
             _conn = conn;
         }
 
         public bool MakeDeposit(decimal amount, out decimal newBalance)
         {
-            if (_bankAccount.TryDeposit(amount))
+            if (amount < 50)
+            {
+                newBalance = _balance;
+                return false;
+            }
+            else
             {
                 string insertQuery = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
                 VALUES (@BankAccountId, 'Deposit', @Date)";
@@ -57,30 +60,19 @@ namespace BankAccountManager
                     updateCmd.Parameters.AddWithValue("@Amount", amount);
                     updateCmd.ExecuteNonQuery();
                 }
-
-                newBalance = _balance + amount;
+                _balance += amount;
+                newBalance = _balance;
                 return true;
 
-            }
-            else
+            }            
+        }
+        public bool MakeWithdraw(decimal amount, out decimal newBalance)
+        {
+            if (amount < 50 || amount > _balance)
             {
                 newBalance = _balance;
                 return false;
             }
-        }
-        public void MakeWithdraw(decimal amount)
-        {
-            if (amount <= 0)
-            {
-                Console.WriteLine("The amount should be positive");
-                return;
-            }
-            else if (amount < 50)
-                Console.WriteLine("You cannot withdraw less then 50.00");
-
-            else if (amount > _balance)
-                Console.WriteLine("The amount to withdraw should be less then the balance");
-
             else
             {
                 string insertQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
@@ -97,7 +89,7 @@ namespace BankAccountManager
                     insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
                     movementId = (int)insertCmd.ExecuteScalar();
                 }
-  
+
                 using (SqlCommand cmd = new(insertIntoWithdraw, _conn))
                 {
                     cmd.Parameters.AddWithValue("@MovementId", movementId);
@@ -112,7 +104,8 @@ namespace BankAccountManager
                     updateCmd.ExecuteNonQuery();
                 }
                 _balance -= amount;
-                Console.WriteLine($"You withdrawed {amount} and your balance now is {_balance}");
+                newBalance = _balance;
+                return true;
             }
         }
 
@@ -287,7 +280,7 @@ namespace BankAccountManager
         //changing the balance when another bank account transfered money to this
         public void creditAmount(decimal amount)
         {
-            _balance += amount;
+            this._balance += amount;
         }
 
         //adding the movement when another bank account transfered money to this

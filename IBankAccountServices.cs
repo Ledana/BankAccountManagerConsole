@@ -13,7 +13,7 @@ namespace BankAccountManager
         public string UserId { get; }
 
         public bool MakeDeposit(decimal amount,  out decimal newBalance);
-        public void MakeWithdraw(decimal amount);
+        public bool MakeWithdraw(decimal amount, out decimal newBalance);
         public decimal GetBalance();
 
         public void TransferMoney(IBankAccountServices bankAccount, decimal amount);

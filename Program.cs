@@ -138,7 +138,7 @@ namespace BankAccountManager
                 if(user.GetBankAccountRepository.MakeDeposit(amount, out decimal newBalance))
                     Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
                 else
-                    Console.WriteLine("The amount you inserted can not be deposited");
+                    Console.WriteLine("The amount can not be deposited");
             }
             else
             {
@@ -151,7 +151,12 @@ namespace BankAccountManager
             Console.WriteLine("Put the amount you want to withdraw");
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
-                user.GetBankAccountRepository.MakeWithdraw(amount);
+            {
+                if(user.GetBankAccountRepository.MakeWithdraw(amount, out decimal newBalance))
+                    Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
+                else
+                    Console.WriteLine("The amount can not be withdrawed");
+            }
             else
                 Console.WriteLine("The amount is not in the right format");
         }

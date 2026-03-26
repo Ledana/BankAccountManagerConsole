@@ -14,29 +14,17 @@ namespace BankAccountManager
         public int Id { get; private set; }
         public string UserId { get; private set; }
         private List<string> _movements { get; set; } = [];
-        private BankAccount _bankAccount;
 
         public FakeBankAccountServices(string userId)
         {
             UserId = userId;
-            _bankAccount = new(userId);
         }
 
         public bool MakeDeposit(decimal amount, out decimal newBalance)
         {
-            ////adding a fake time for testing
+            //adding a fake time for testing
             var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
-
-            //if (_bankAccount.TryDeposit(amount))
-            //{
-            //    newBalance = _bankAccount.Balance;
-
-            //    _movements.Add($"You deposited {amount} in {fakeTime.GetUtcNow().DateTime}");
-            //    return true;
-            //}
-            //newBalance = _balance;
-            //return false;
-
+ 
             if (amount < 50)
             {
                 newBalance = _balance;
@@ -48,25 +36,20 @@ namespace BankAccountManager
             return true;
         }
 
-        public void MakeWithdraw(decimal amount)
+        public bool MakeWithdraw(decimal amount, out decimal newBalance)
         {
             //adding a fake time for testing
             var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
-            if (amount <= 0)
-            {
-                Console.WriteLine("The amount should be positive");
-                return;
-            }
 
-            if (amount > _balance)
-                Console.WriteLine("The amount to withdraw should be less then the balance");
-
-            else
+            if (amount < 50 || amount > _balance )
             {
-                _balance -= amount;
-                Console.WriteLine($"You withdrawed {amount} and your balance now is {_balance}");
-                _movements.Add($"You withdrawed {amount} at {fakeTime.GetUtcNow().DateTime}");
+                newBalance = _balance;
+                return false;
             }
+            _balance -= amount;
+            newBalance = _balance;
+            _movements.Add($"{fakeTime.GetUtcNow().DateTime:o} Deposit {amount:C2}");
+            return true;
         }
 
         public void TransferMoney(IBankAccountServices bankAccount, decimal amount)
