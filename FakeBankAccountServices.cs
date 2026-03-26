@@ -50,7 +50,7 @@ namespace BankAccountManager
             }
             _account.ApplyDebit(amount);
             newBalance = _account.Balance;
-            _account.AddMovement($"{fakeTime.GetUtcNow().DateTime:o} Deposit {amount:C2}");
+            _account.AddMovement($"{fakeTime.GetUtcNow().DateTime:o} Withdraw {amount:C2}");
             return true;
         }
 
@@ -92,7 +92,7 @@ namespace BankAccountManager
         //adding to movements when another bank account transfers money to this
         public void addMovement(IBankAccountServices bankAccountServices, decimal amount, DateTime dateTime)
         {
-            _account.AddMovement($"{bankAccountServices.GetUserId} transfered you {amount} at {dateTime}");
+            _account.AddMovement($"{bankAccountServices.GetUserId()} transfered you {amount} at {dateTime}");
         }
 
         public decimal GetBalance()
