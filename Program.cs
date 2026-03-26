@@ -170,6 +170,11 @@ namespace BankAccountManager
                 Console.WriteLine("The userId is not in the right format");
                 return;
             }
+            if (targetId == user.UserId)
+            {
+                Console.WriteLine("You cannot tranfer money to yourself");
+                return;
+            }
 
             User target = allUsers.FindUserById(targetId);
 
@@ -178,16 +183,19 @@ namespace BankAccountManager
                 Console.WriteLine("The target id could not be found");
                 return;
             }
+
             Console.WriteLine("Put the amount you want to transfer");
 
-            if (!decimal.TryParse(Console.ReadLine(), out decimal amount))
+            if (decimal.TryParse(Console.ReadLine(), out decimal amount))
             {
-                Console.WriteLine("The amount is not in the right format");
-                return;
+                if (user.GetBankAccountRepository.TransferMoney(target.GetBankAccountRepository, amount, out decimal newBalance))
+                    Console.WriteLine($"You transfer {amount} to {targetId} and you balance now is {newBalance}");
+                else
+                    Console.WriteLine("The amount can not be transfered");
             }
-                
-            user.GetBankAccountRepository.TransferMoney(target.GetBankAccountRepository, amount);
-        
+            else
+                Console.WriteLine("The amount is not in the right format");
+
         }
         public static void ChooseAction()
         {

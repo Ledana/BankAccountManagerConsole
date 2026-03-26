@@ -52,38 +52,24 @@ namespace BankAccountManager
             return true;
         }
 
-        public void TransferMoney(IBankAccountServices bankAccount, decimal amount)
+        public bool TransferMoney(IBankAccountServices bankAccount, decimal amount, out decimal newBalance)
         {
             //adding a fake time for testing
             var fakeTime = new FakeTimeProvider(DateTimeOffset.Parse("2024-01-01T00:00:00Z"));
 
-            if (amount <= 0)
+            if (amount < 50 || amount > _balance)
             {
-                Console.WriteLine("The amount should be positive");
-                return;
-            }
-            else if (amount >= _balance)
-            {
-                Console.WriteLine("The amount is bigger than your balance");
-                return;
-            }
-
-            if (bankAccount == null)
-                Console.WriteLine("The userId is not valid");
-            else if (bankAccount.UserId == UserId)
-            {
-                Console.WriteLine("You can not transfer money to yourself");
-                return;
+                newBalance = _balance;
+                return false;
             }
             else
             {
                 _balance -= amount;
+                newBalance = _balance;
+                _movements.Add($"{fakeTime.GetUtcNow().DateTime:o} Transfer {amount:C2} to {bankAccount.UserId}");
                 bankAccount.creditAmount(amount);
                 bankAccount.addMovement(this, amount, fakeTime.GetUtcNow().DateTime);
-
-                Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
-                Console.WriteLine($"Your balance is now {_balance}");
-                _movements.Add($"You transfered {amount} to {bankAccount.UserId} at {fakeTime.GetUtcNow().DateTime}");
+                return true;
             }
         }
 

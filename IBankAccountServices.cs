@@ -16,7 +16,7 @@ namespace BankAccountManager
         public bool MakeWithdraw(decimal amount, out decimal newBalance);
         public decimal GetBalance();
 
-        public void TransferMoney(IBankAccountServices bankAccount, decimal amount);
+        public bool TransferMoney(IBankAccountServices bankAccount, decimal amount, out decimal newBalance);
         public void GetMovements();
         //a method to change the balance of another bank account
         public void creditAmount(decimal amount);

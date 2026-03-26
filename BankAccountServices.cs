@@ -109,31 +109,17 @@ namespace BankAccountManager
             }
         }
 
-        public void TransferMoney(IBankAccountServices bankAccount, decimal amount)
+        public bool TransferMoney(IBankAccountServices bankAccount, decimal amount, out decimal newBalance)
         { 
-            if (amount <= 0)
+            if (amount < 50 || amount > _balance)
             {
-                Console.WriteLine("The amount should be positive");
-                return;
+                newBalance = _balance;
+                return false;
             }
-            else if(amount >= _balance)
+            else
             {
-                Console.WriteLine("The amount is bigger than your balance");
-                return;
-            }
-            else if(amount < 50)
-                Console.WriteLine("You cannot transfer less then 50.00");
-
-            if (bankAccount == null)
-                Console.WriteLine("The userId is not valid");
-            else if (bankAccount.UserId == UserId)
-            {
-                Console.WriteLine("You can not transfer money to yourself");
-                return;
-            }
-
-            // perform DB changes (existing code)...
-            int movementId;
+                // perform DB changes (existing code)...
+                int movementId;
                 int targetMovementId;
                 //insert into table movements for this bank account
                 string insertIntoMovementQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
@@ -193,12 +179,12 @@ namespace BankAccountManager
                 }
 
                 _balance -= amount;
+                newBalance = _balance;
                 bankAccount.creditAmount(amount);
-            _movements.Add($"You transfered {amount} to {bankAccount.UserId}");
-                Console.WriteLine($"You transfered {amount} to {bankAccount.UserId}");
-                Console.WriteLine($"Your balance is now {_balance - amount}");
+                _movements.Add($"You transfered {amount} to {bankAccount.UserId}");
+                return true;
+            }
         }
-
         public void GetMovements()
         {
             ArgumentNullException.ThrowIfNull(_conn);
