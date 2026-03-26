@@ -14,6 +14,9 @@ namespace BankAccountManager
         private decimal _balance;
         public int Id { get; private set; }
         public string UserId { get; private set; }
+
+        public IReadOnlyList<string> Movements => _movements.AsReadOnly();
+
         private List<string> _movements = [];
         private readonly SqlConnection _conn;
 
@@ -184,7 +187,7 @@ namespace BankAccountManager
                 return true;
             }
         }
-        public void GetMovements()
+        public IReadOnlyList<string> AddMovements()
         {
             ArgumentNullException.ThrowIfNull(_conn);
             if (Id == 0) throw new InvalidOperationException("BankAccount.Id must be set before loading movements.");
@@ -252,15 +255,7 @@ namespace BankAccountManager
                     }
                 }
             }
-            if (_movements.Count == 0)
-                Console.WriteLine("You have no movements");
-            else
-            {
-                foreach (var item in _movements)
-                {
-                    Console.WriteLine(item);
-                }
-            }
+            return _movements;
         }
         //changing the balance when another bank account transfered money to this
         public void creditAmount(decimal amount)

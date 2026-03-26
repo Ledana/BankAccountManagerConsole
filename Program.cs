@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.InteropServices;
 using Microsoft.Data.SqlClient;
 
 namespace BankAccountManager
@@ -100,7 +101,7 @@ namespace BankAccountManager
                             }
                             if (input == "4")
                             {
-                                user.GetBankAccountRepository.GetMovements();
+                                PrintAllMovements(user);
                             }
                             if (input == "5")
                                 break;
@@ -189,6 +190,25 @@ namespace BankAccountManager
             else
                 Console.WriteLine("The amount is not in the right format");
 
+        }
+        public static void PrintAllMovements(User user)
+        {
+            IReadOnlyList<string> movements;
+
+            if (user.GetBankAccountRepository is BankAccountServices)
+                movements = user.GetBankAccountRepository.AddMovements();
+            else
+                movements = user.GetBankAccountRepository.Movements;
+
+            if (movements.Count == 0)
+                Console.WriteLine("You have no movements");
+            else
+            {
+                foreach (var item in movements)
+                {
+                    Console.WriteLine(item);
+                }
+            }
         }
         public static void ChooseAction()
         {

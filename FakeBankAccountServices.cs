@@ -14,6 +14,7 @@ namespace BankAccountManager
         public int Id { get; private set; }
         public string UserId { get; private set; }
         private List<string> _movements { get; set; } = [];
+        public IReadOnlyList<string> Movements => _movements.AsReadOnly();
         public FakeBankAccountServices(string userId)
         {
             UserId = userId;
@@ -72,19 +73,6 @@ namespace BankAccountManager
             }
         }
 
-        public void GetMovements()
-        {
-            if (_movements.Count == 0)
-                _movements.Add("You have no movements");
-            else
-            {
-                foreach (var item in _movements)
-                {
-                    Console.WriteLine(item);
-                }
-            }
-        }
-
         //changing the balance when another bank account transfers moeny to this
         public void creditAmount(decimal amount)
         {
@@ -100,6 +88,11 @@ namespace BankAccountManager
         public decimal GetBalance()
         {
             return _balance;
+        }
+
+        public IReadOnlyList<string> AddMovements()
+        {
+            throw new NotImplementedException();
         }
     }
 }
