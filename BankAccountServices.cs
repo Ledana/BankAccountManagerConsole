@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -118,73 +119,90 @@ namespace BankAccountManager
                 newBalance = _balance;
                 return false;
             }
-            else
+            using (var sqlTran = _conn.BeginTransaction())
             {
-                // perform DB changes (existing code)...
-                int movementId;
-                int targetMovementId;
-                //insert into table movements for this bank account
-                string insertIntoMovementQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
+                try
+                {
+                    // perform DB changes (existing code)...
+                    int movementId;
+                    int targetMovementId;
+                    //insert into table movements for this bank account
+                    string insertIntoMovementQuery = @" INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id
                 VALUES (@BankAccountId, 'Transfer', @Date)";
-                using (SqlCommand insertCmd = new SqlCommand(insertIntoMovementQuery, _conn))
-                {
-                    insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
-                    insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
-                    movementId = (int)insertCmd.ExecuteScalar();
-                }
+                    using (SqlCommand insertCmd = new SqlCommand(insertIntoMovementQuery, _conn, sqlTran))
+                    {
+                        insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                        insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
+                        movementId = (int)insertCmd.ExecuteScalar();
+                    }
 
-                //change the balance of this bank account
-                string updateBalanceQuery = @" UPDATE BankAccount SET Balance = Balance - @Amount WHERE Id = @BankAccountId";
-                using (SqlCommand updateCmd = new SqlCommand(updateBalanceQuery, _conn))
-                {
-                    updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
-                    updateCmd.Parameters.AddWithValue("@Amount", amount);
-                    updateCmd.ExecuteNonQuery();
-                }
+                    //change the balance of this bank account
+                    string updateBalanceQuery = @" UPDATE BankAccount SET Balance = Balance - @Amount WHERE Id = @BankAccountId";
+                    using (SqlCommand updateCmd = new SqlCommand(updateBalanceQuery, _conn, sqlTran))
+                    {
+                        updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                        updateCmd.Parameters.AddWithValue("@Amount", amount);
+                        updateCmd.ExecuteNonQuery();
+                    }
 
-                //insert into table transfer for this bank account
-                string insertIntoTransfer = @"INSERT INTO [Transfer] (MovementId, Amount, ToBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
-                using (SqlCommand cmd = new(insertIntoTransfer, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@MovementId", movementId);
-                    cmd.Parameters.AddWithValue("@Amount", amount);
-                    cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
-                    cmd.ExecuteNonQuery();
-                }
+                    //insert into table transfer for this bank account
+                    string insertIntoTransfer = @"INSERT INTO [Transfer] (MovementId, Amount, ToBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
+                    using (SqlCommand cmd = new(insertIntoTransfer, _conn, sqlTran))
+                    {
+                        cmd.Parameters.AddWithValue("@MovementId", movementId);
+                        cmd.Parameters.AddWithValue("@Amount", amount);
+                        cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
+                        cmd.ExecuteNonQuery();
+                    }
 
-                //insert into table movements for the target bank account
-                string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id VALUES (@BankAccountId, 'Transfer', @Date)";
-                using (SqlCommand cmd = new(insertIntoMovementTarget, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
-                    cmd.Parameters.AddWithValue("@Date", DateTime.Now);
-                    targetMovementId = (int)cmd.ExecuteScalar();
-                }
+                    //insert into table movements for the target bank account
+                    string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id VALUES (@BankAccountId, 'Transfer', @Date)";
+                    using (SqlCommand cmd = new(insertIntoMovementTarget, _conn, sqlTran))
+                    {
+                        cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
+                        cmd.Parameters.AddWithValue("@Date", DateTime.Now);
+                        targetMovementId = (int)cmd.ExecuteScalar();
+                    }
 
-                //insert into table trasnfer for the target bank account
-                string insertIntoTransferTarget = @"INSERT INTO [Transfer] (MovementId, Amount, FromBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
-                using (SqlCommand cmd = new(insertIntoTransferTarget, _conn))
-                {
-                    cmd.Parameters.AddWithValue("@MovementId", targetMovementId);
-                    cmd.Parameters.AddWithValue("@Amount", amount);
-                    cmd.Parameters.AddWithValue("@BankAccountId", Id);
-                    cmd.ExecuteNonQuery();
-                }
+                    //insert into table trasnfer for the target bank account
+                    string insertIntoTransferTarget = @"INSERT INTO [Transfer] (MovementId, Amount, FromBankAccountId) VALUES (@MovementId, @Amount, @BankAccountId)";
+                    using (SqlCommand cmd = new(insertIntoTransferTarget, _conn, sqlTran))
+                    {
+                        cmd.Parameters.AddWithValue("@MovementId", targetMovementId);
+                        cmd.Parameters.AddWithValue("@Amount", amount);
+                        cmd.Parameters.AddWithValue("@BankAccountId", Id);
+                        cmd.ExecuteNonQuery();
+                    }
 
-                //change the balance of the target bank account
-                string updateBalanceTargetQuery = "UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @Id";
-                using (SqlCommand updateCmd = new SqlCommand(updateBalanceTargetQuery, _conn))
-                {
-                    updateCmd.Parameters.AddWithValue("@Id", bankAccount.Id);
-                    updateCmd.Parameters.AddWithValue("@Amount", amount);
-                    updateCmd.ExecuteNonQuery();
-                }
+                    //change the balance of the target bank account
+                    string updateBalanceTargetQuery = "UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @Id";
+                    using (SqlCommand updateCmd = new SqlCommand(updateBalanceTargetQuery, _conn, sqlTran))
+                    {
+                        updateCmd.Parameters.AddWithValue("@Id", bankAccount.Id);
+                        updateCmd.Parameters.AddWithValue("@Amount", amount);
+                        updateCmd.ExecuteNonQuery();
+                    }
 
-                _balance -= amount;
-                newBalance = _balance;
-                bankAccount.creditAmount(amount);
-                _movements.Add($"You transfered {amount} to {bankAccount.UserId}");
-                return true;
+                    sqlTran.Commit();
+                    _balance -= amount;
+                    newBalance = _balance;
+                    bankAccount.creditAmount(amount);
+                    _movements.Add($"You transfered {amount} to {bankAccount.UserId}");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                    try
+                    {
+                        sqlTran.Rollback();
+                    }
+                    catch (Exception exRollBack)
+                    {
+                        Console.WriteLine("Rollback failed: " + exRollBack.ToString());
+                    }
+                    throw;
+                }
             }
         }
         public IReadOnlyList<string> AddMovements()
