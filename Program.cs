@@ -21,8 +21,8 @@ namespace BankAccountManager
                     //allusers choose if you want to work with the real repository which has access
                     //in the database or the fake repository with hard coded users
 
-                    //var allUsers = GetRepository(new UserRepository(conn));
-                    var allUsers = GetRepository(new FakeUsersRepository());
+                    var allUsers = GetRepository(new UserRepository(conn));
+                    //var allUsers = GetRepository(new FakeUsersRepository());
                     var users = allUsers.GetAllUsers();
 
                     Console.WriteLine("Wellcome to our bank app");
@@ -55,7 +55,7 @@ namespace BankAccountManager
                                     if (allUsers.ValidatePassword(user.UserId, username))
                                     {
                                         Console.WriteLine($"Wellcome {user.FirstName} {user.LastName}");
-                                        Console.WriteLine($"You balance is: {user.GetBankAccountRepository.GetBalance():F2}\n");
+                                        Console.WriteLine($"You balance is: {user.GetBankAccountServices.GetBalance():F2}\n");
                                         break;
                                     }
                                     //if the user doesnt remember password can exit the app
@@ -130,7 +130,7 @@ namespace BankAccountManager
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
             {
-                if(user.GetBankAccountRepository.MakeDeposit(amount, out decimal newBalance))
+                if(user.GetBankAccountServices.MakeDeposit(amount, out decimal newBalance))
                     Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
                 else
                     Console.WriteLine("The amount can not be deposited");
@@ -147,7 +147,7 @@ namespace BankAccountManager
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
             {
-                if(user.GetBankAccountRepository.MakeWithdraw(amount, out decimal newBalance))
+                if(user.GetBankAccountServices.MakeWithdraw(amount, out decimal newBalance))
                     Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
                 else
                     Console.WriteLine("The amount can not be withdrawed");
@@ -182,7 +182,7 @@ namespace BankAccountManager
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
             {
-                if (user.GetBankAccountRepository.TransferMoney(target.GetBankAccountRepository, amount, out decimal newBalance))
+                if (user.GetBankAccountServices.TransferMoney(target.GetBankAccountServices, amount, out decimal newBalance))
                     Console.WriteLine($"You transfer {amount} to {targetId} and you balance now is {newBalance}");
                 else
                     Console.WriteLine("The amount can not be transfered");
@@ -193,12 +193,7 @@ namespace BankAccountManager
         }
         public static void PrintAllMovements(User user)
         {
-            IReadOnlyList<string> movements;
-
-            if (user.GetBankAccountRepository is BankAccountServices)
-                movements = user.GetBankAccountRepository.AddMovements();
-            else
-                movements = user.GetBankAccountRepository.Movements;
+            var movements = user.GetBankAccountServices.GetMovements();
 
             if (movements.Count == 0)
                 Console.WriteLine("You have no movements");

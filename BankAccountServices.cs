@@ -12,28 +12,34 @@ namespace BankAccountManager
 {
     public class BankAccountServices : IBankAccountServices
     {
-        private decimal _balance;
-        public int Id { get; private set; }
-        public string UserId { get; private set; }
+        //private decimal _balance;
+        //public int Id { get; private set; }
+        //public string UserId { get; private set; }
 
-        public IReadOnlyList<string> Movements => _movements.AsReadOnly();
+        //public IReadOnlyList<string> Movements => _movements.AsReadOnly();
 
-        private List<string> _movements = [];
+        //private List<string> _movements = [];
         private readonly SqlConnection _conn;
+        private readonly BankAccount _account;
 
-        public BankAccountServices(string userId, int id, decimal balance, SqlConnection conn)
+        //public BankAccountServices(string userId, int id, decimal balance, SqlConnection conn)
+        //{
+        //    UserId = userId;
+        //    Id = id;
+        //    _balance = balance;
+        //    _conn = conn;
+        //}
+        public BankAccountServices(BankAccount account, SqlConnection conn)
         {
-            UserId = userId;
-            Id = id;
-            _balance = balance;
             _conn = conn;
+            _account = account;
         }
 
         public bool MakeDeposit(decimal amount, out decimal newBalance)
         {
             if (amount < 50)
             {
-                newBalance = _balance;
+                newBalance = _account.Balance;
                 return false;
             }
             else
@@ -46,7 +52,7 @@ namespace BankAccountManager
 
                 using (SqlCommand insertCmd = new(insertQuery, _conn))
                 {
-                    insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                    insertCmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
                     insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
                     MovementId = (int)insertCmd.ExecuteScalar();
 
@@ -59,21 +65,21 @@ namespace BankAccountManager
                 }
                 using (SqlCommand updateCmd = new SqlCommand(updateQuery, _conn))
                 {
-                    updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                    updateCmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
                     updateCmd.Parameters.AddWithValue("@Amount", amount);
                     updateCmd.ExecuteNonQuery();
                 }
-                _balance += amount;
-                newBalance = _balance;
+                _account.ApplyCredit(amount);
+                newBalance = _account.Balance;
                 return true;
 
             }            
         }
         public bool MakeWithdraw(decimal amount, out decimal newBalance)
         {
-            if (amount < 50 || amount > _balance)
+            if (amount < 50 || amount > _account.Balance)
             {
-                newBalance = _balance;
+                newBalance = _account.Balance;
                 return false;
             }
             else
@@ -88,7 +94,7 @@ namespace BankAccountManager
 
                 using (SqlCommand insertCmd = new SqlCommand(insertQuery, _conn))
                 {
-                    insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                    insertCmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
                     insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
                     movementId = (int)insertCmd.ExecuteScalar();
                 }
@@ -102,21 +108,21 @@ namespace BankAccountManager
 
                 using (SqlCommand updateCmd = new SqlCommand(updateQuery, _conn))
                 {
-                    updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                    updateCmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
                     updateCmd.Parameters.AddWithValue("@Amount", amount);
                     updateCmd.ExecuteNonQuery();
                 }
-                _balance -= amount;
-                newBalance = _balance;
+                _account.ApplyDebit(amount);
+                newBalance = _account.Balance;
                 return true;
             }
         }
 
-        public bool TransferMoney(IBankAccountServices bankAccount, decimal amount, out decimal newBalance)
+        public bool TransferMoney(IBankAccountServices bankAccountServices, decimal amount, out decimal newBalance)
         { 
-            if (amount < 50 || amount > _balance)
+            if (amount < 50 || amount > _account.Balance)
             {
-                newBalance = _balance;
+                newBalance = _account.Balance;
                 return false;
             }
             using (var sqlTran = _conn.BeginTransaction())
@@ -131,7 +137,7 @@ namespace BankAccountManager
                 VALUES (@BankAccountId, 'Transfer', @Date)";
                     using (SqlCommand insertCmd = new SqlCommand(insertIntoMovementQuery, _conn, sqlTran))
                     {
-                        insertCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                        insertCmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
                         insertCmd.Parameters.AddWithValue("@Date", DateTime.Now);
                         movementId = (int)insertCmd.ExecuteScalar();
                     }
@@ -140,7 +146,7 @@ namespace BankAccountManager
                     string updateBalanceQuery = @" UPDATE BankAccount SET Balance = Balance - @Amount WHERE Id = @BankAccountId";
                     using (SqlCommand updateCmd = new SqlCommand(updateBalanceQuery, _conn, sqlTran))
                     {
-                        updateCmd.Parameters.AddWithValue("@BankAccountId", Id);
+                        updateCmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
                         updateCmd.Parameters.AddWithValue("@Amount", amount);
                         updateCmd.ExecuteNonQuery();
                     }
@@ -151,7 +157,7 @@ namespace BankAccountManager
                     {
                         cmd.Parameters.AddWithValue("@MovementId", movementId);
                         cmd.Parameters.AddWithValue("@Amount", amount);
-                        cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
+                        cmd.Parameters.AddWithValue("@BankAccountId", bankAccountServices.GetId());
                         cmd.ExecuteNonQuery();
                     }
 
@@ -159,7 +165,7 @@ namespace BankAccountManager
                     string insertIntoMovementTarget = @"INSERT INTO Movement (BankAccountId, Title, [Date]) OUTPUT INSERTED.Id VALUES (@BankAccountId, 'Transfer', @Date)";
                     using (SqlCommand cmd = new(insertIntoMovementTarget, _conn, sqlTran))
                     {
-                        cmd.Parameters.AddWithValue("@BankAccountId", bankAccount.Id);
+                        cmd.Parameters.AddWithValue("@BankAccountId", bankAccountServices.GetId());
                         cmd.Parameters.AddWithValue("@Date", DateTime.Now);
                         targetMovementId = (int)cmd.ExecuteScalar();
                     }
@@ -170,7 +176,7 @@ namespace BankAccountManager
                     {
                         cmd.Parameters.AddWithValue("@MovementId", targetMovementId);
                         cmd.Parameters.AddWithValue("@Amount", amount);
-                        cmd.Parameters.AddWithValue("@BankAccountId", Id);
+                        cmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
                         cmd.ExecuteNonQuery();
                     }
 
@@ -178,16 +184,16 @@ namespace BankAccountManager
                     string updateBalanceTargetQuery = "UPDATE BankAccount SET Balance = Balance + @Amount WHERE Id = @Id";
                     using (SqlCommand updateCmd = new SqlCommand(updateBalanceTargetQuery, _conn, sqlTran))
                     {
-                        updateCmd.Parameters.AddWithValue("@Id", bankAccount.Id);
+                        updateCmd.Parameters.AddWithValue("@Id", bankAccountServices.GetId());
                         updateCmd.Parameters.AddWithValue("@Amount", amount);
                         updateCmd.ExecuteNonQuery();
                     }
 
                     sqlTran.Commit();
-                    _balance -= amount;
-                    newBalance = _balance;
-                    bankAccount.creditAmount(amount);
-                    _movements.Add($"You transfered {amount} to {bankAccount.UserId}");
+                    _account.ApplyDebit(amount);
+                    newBalance = _account.Balance;
+                    bankAccountServices.creditAmount(amount);
+                    //_movements.Add($"You transfered {amount} to {bankAccount.UserId}");
                     return true;
                 }
                 catch (Exception ex)
@@ -205,14 +211,16 @@ namespace BankAccountManager
                 }
             }
         }
-        public IReadOnlyList<string> AddMovements()
+        
+        public IReadOnlyList<string> GetMovements()
         {
             ArgumentNullException.ThrowIfNull(_conn);
-            if (Id == 0) throw new InvalidOperationException("BankAccount.Id must be set before loading movements.");
+            if (_account.Id == 0) throw new InvalidOperationException("BankAccount.Id must be set before loading movements.");
             if (_conn.State != System.Data.ConnectionState.Open)
                 throw new InvalidOperationException("The supplied SqlConnection must be open.");
 
-            _movements.Clear();
+            //.Clear();
+            List<string> movements = [];
 
             const string sql = @"SELECT m.Id, m.Title, m.[Date] AS MovementDate,
             d.Amount AS DepositAmount,
@@ -229,7 +237,7 @@ namespace BankAccountManager
 
             using (var cmd = new SqlCommand(sql, _conn))
             {
-                cmd.Parameters.AddWithValue("@BankAccountId", Id);
+                cmd.Parameters.AddWithValue("@BankAccountId", _account.Id);
 
                 using (var reader = cmd.ExecuteReader())
                 {
@@ -269,27 +277,34 @@ namespace BankAccountManager
                             // fallback when no specific amount column is present
                             formatted = $"{date:yyyy-MM-dd HH:mm} - {title} (Id:{movementId})";
                         }
-                        _movements.Add(formatted);
+                        movements.Add(formatted);
                     }
                 }
             }
-            return _movements;
+            return movements;
         }
         //changing the balance when another bank account transfered money to this
         public void creditAmount(decimal amount)
         {
-            this._balance += amount;
+            this._account.ApplyCredit(amount);
         }
-
+        public string GetUserId()
+        {
+            return _account.UserId;
+        }
+        public int GetId()
+        {
+            return _account.Id;
+        }
         //adding the movement when another bank account transfered money to this
         public void addMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime)
         {
-            this._movements.Add($"{bankAccount.UserId} transfered you {amount} at {dateTime}");
+            this._account.AddMovement($"{bankAccount.GetUserId()} transfered you {amount} at {dateTime}");
         }
 
         public decimal GetBalance()
         {
-            return _balance;
+            return _account.Balance;
         }
 
     }

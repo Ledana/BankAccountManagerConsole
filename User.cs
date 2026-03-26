@@ -12,14 +12,14 @@ namespace BankAccountManager
         internal string Password {  get; private set; }
         private static int _count = 0;
         private string _userId = "123456789";
-        public IBankAccountServices GetBankAccountRepository { get; set; }
+        public IBankAccountServices GetBankAccountServices { get; set; }
         public User(string userId, string firstName, string lastName, string userName, IBankAccountServices bankAccountRepository)
         {
             FirstName = firstName;
             LastName = lastName;
             UserId = userId;
             UserName = userName;
-            GetBankAccountRepository = bankAccountRepository;
+            GetBankAccountServices = bankAccountRepository;
         }
 
         //creating details for harcoded users
@@ -32,7 +32,7 @@ namespace BankAccountManager
             UserId = GenerateUserId();
             UserName = GenerateUserName(lastName, UserId);
 
-            GetBankAccountRepository = new FakeBankAccountServices(UserId);
+            GetBankAccountServices = new FakeBankAccountServices(new BankAccount(UserId));
         }
 
         private string GenerateUserId()
