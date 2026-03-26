@@ -13,6 +13,7 @@ namespace BankAccountManager
         private static int _count = 0;
         private string _userId = "123456789";
         public IBankAccountServices GetBankAccountServices { get; set; }
+        //ctor to get the users from the database using its details
         public User(string userId, string firstName, string lastName, string userName, IBankAccountServices bankAccountRepository)
         {
             FirstName = firstName;

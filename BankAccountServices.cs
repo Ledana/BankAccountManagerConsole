@@ -12,23 +12,8 @@ namespace BankAccountManager
 {
     public class BankAccountServices : IBankAccountServices
     {
-        //private decimal _balance;
-        //public int Id { get; private set; }
-        //public string UserId { get; private set; }
-
-        //public IReadOnlyList<string> Movements => _movements.AsReadOnly();
-
-        //private List<string> _movements = [];
         private readonly SqlConnection _conn;
         private readonly BankAccount _account;
-
-        //public BankAccountServices(string userId, int id, decimal balance, SqlConnection conn)
-        //{
-        //    UserId = userId;
-        //    Id = id;
-        //    _balance = balance;
-        //    _conn = conn;
-        //}
         public BankAccountServices(BankAccount account, SqlConnection conn)
         {
             _conn = conn;
@@ -192,7 +177,7 @@ namespace BankAccountManager
                     sqlTran.Commit();
                     _account.ApplyDebit(amount);
                     newBalance = _account.Balance;
-                    bankAccountServices.creditAmount(amount);
+                    bankAccountServices.CreditAmount(amount);
                     //_movements.Add($"You transfered {amount} to {bankAccount.UserId}");
                     return true;
                 }
@@ -219,7 +204,6 @@ namespace BankAccountManager
             if (_conn.State != System.Data.ConnectionState.Open)
                 throw new InvalidOperationException("The supplied SqlConnection must be open.");
 
-            //.Clear();
             List<string> movements = [];
 
             const string sql = @"SELECT m.Id, m.Title, m.[Date] AS MovementDate,
@@ -284,7 +268,7 @@ namespace BankAccountManager
             return movements;
         }
         //changing the balance when another bank account transfered money to this
-        public void creditAmount(decimal amount)
+        public void CreditAmount(decimal amount)
         {
             this._account.ApplyCredit(amount);
         }
@@ -297,7 +281,7 @@ namespace BankAccountManager
             return _account.Id;
         }
         //adding the movement when another bank account transfered money to this
-        public void addMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime)
+        public void AddMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime)
         {
             this._account.AddMovement($"{bankAccount.GetUserId()} transfered you {amount} at {dateTime}");
         }

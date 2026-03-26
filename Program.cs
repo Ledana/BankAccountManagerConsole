@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Data.SqlClient;
 
 namespace BankAccountManager
@@ -26,7 +27,7 @@ namespace BankAccountManager
                     var users = allUsers.GetAllUsers();
 
                     Console.WriteLine("Wellcome to our bank app");
-                    while (username != "exit")
+                    while (username.ToLower() != "exit")
                     {
                         Console.WriteLine("Please input your username or type 'exit'");
                         username = Console.ReadLine();
@@ -82,7 +83,7 @@ namespace BankAccountManager
                         {
                             ChooseAction();
                             input = Console.ReadLine();
-                            if (input == null)
+                            if (string.IsNullOrEmpty(input))
                             {
                                 Console.WriteLine("The input is not in the right format");
                                 continue;
@@ -124,14 +125,13 @@ namespace BankAccountManager
             return repository;
         }
         public static void Deposit(User user)
-        {
-            
+        {         
             Console.WriteLine("Put the amount you want to deposit");
 
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
             {
                 if(user.GetBankAccountServices.MakeDeposit(amount, out decimal newBalance))
-                    Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
+                    Console.WriteLine($"You deposited {amount} and your balance now is {newBalance}");
                 else
                     Console.WriteLine("The amount can not be deposited");
             }
@@ -148,18 +148,20 @@ namespace BankAccountManager
             if (decimal.TryParse(Console.ReadLine(), out decimal amount))
             {
                 if(user.GetBankAccountServices.MakeWithdraw(amount, out decimal newBalance))
-                    Console.WriteLine($"You deposidet {amount} and your balance now is {newBalance}");
+                    Console.WriteLine($"You withdrawed {amount} and your balance now is {newBalance}");
                 else
                     Console.WriteLine("The amount can not be withdrawed");
             }
             else
                 Console.WriteLine("The amount is not in the right format");
         }
+        //transfer method requeries the list of all users in which can transfer and the user to make the transfer
         public static void Transfer(IUsersRepository allUsers, User user)
         {
             Console.WriteLine("Put the userId you want to transfer to");
             string? targetId = Console.ReadLine();
-            if (targetId == null)
+            //validate the targetId
+            if (string.IsNullOrEmpty(targetId))
             {
                 Console.WriteLine("The userId is not in the right format");
                 return;
@@ -169,7 +171,7 @@ namespace BankAccountManager
                 Console.WriteLine("You cannot tranfer money to yourself");
                 return;
             }
-
+            //find the user by targetId
             User? target = allUsers.FindUserById(targetId);
 
             if (target == null)

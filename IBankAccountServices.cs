@@ -15,10 +15,10 @@ namespace BankAccountManager
         public IReadOnlyList<string> GetMovements();
         public bool TransferMoney(IBankAccountServices bankAccount, decimal amount, out decimal newBalance);
         //a method to change the balance of another bank account
-        public void creditAmount(decimal amount);
+        public void CreditAmount(decimal amount);
         public string GetUserId();
         public int GetId();
         //a method to add to movements of another bank account
-        public void addMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime);
+        public void AddMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime);
     }
 }

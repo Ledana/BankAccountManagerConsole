@@ -17,12 +17,14 @@ namespace BankAccountManager
 
         private List<string> _movements = [];
 
+        //ctor for users from database
         public BankAccount(string userId, int id, decimal balance = 0m)
         {
             UserId = userId;
             Id = id;
             Balance = balance;
         }
+        //ctor for harcoded users
         public BankAccount(string userId, decimal balance = 0m)
         {
             UserId = userId;

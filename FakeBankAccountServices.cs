@@ -10,15 +10,9 @@ namespace BankAccountManager
 {
     public class FakeBankAccountServices : IBankAccountServices
     {
-        //private decimal _balance;
-        //public int Id { get; private set; }
-        //public string UserId { get; private set; }
-        //private List<string> _movements { get; set; } = [];
-        //public IReadOnlyList<string> Movements => _movements.AsReadOnly();
         private BankAccount _account;
         public FakeBankAccountServices(BankAccount account)
         {
-            //UserId = userId;
             _account = account;
         }
 
@@ -70,14 +64,14 @@ namespace BankAccountManager
                 newBalance = _account.Balance;
                 _account.AddMovement($"{fakeTime.GetUtcNow().DateTime:o} Transfer {amount:C2} to {_account.UserId}");
 
-                bankAccountServices.creditAmount(amount);
-                bankAccountServices.addMovement(this, amount, fakeTime.GetUtcNow().DateTime);
+                bankAccountServices.CreditAmount(amount);
+                bankAccountServices.AddMovement(this, amount, fakeTime.GetUtcNow().DateTime);
                 return true;
             }
         }
 
         //changing the balance when another bank account transfers moeny to this
-        public void creditAmount(decimal amount)
+        public void CreditAmount(decimal amount)
         {
             _account.ApplyCredit(amount);
         }
@@ -90,7 +84,7 @@ namespace BankAccountManager
             return _account.Id;
         }
         //adding to movements when another bank account transfers money to this
-        public void addMovement(IBankAccountServices bankAccountServices, decimal amount, DateTime dateTime)
+        public void AddMovement(IBankAccountServices bankAccountServices, decimal amount, DateTime dateTime)
         {
             _account.AddMovement($"{bankAccountServices.GetUserId()} transfered you {amount} at {dateTime}");
         }
@@ -103,10 +97,6 @@ namespace BankAccountManager
         public IReadOnlyList<string> GetMovements()
         {
             return _account.Movements;
-        }
-
-        
-
-        
+        }   
     }
 }
