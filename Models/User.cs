@@ -1,7 +1,8 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using BankAccountManager.Services;
+using Microsoft.Data.SqlClient;
 using System.Globalization;
 
-namespace BankAccountManager
+namespace BankAccountManager.Models
 {
     public class User
     {

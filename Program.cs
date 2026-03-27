@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
+using BankAccountManager.Models;
+using BankAccountManager.Repositories;
 using Microsoft.Data.SqlClient;
 
 namespace BankAccountManager

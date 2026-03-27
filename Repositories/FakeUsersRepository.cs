@@ -1,5 +1,6 @@
-﻿
-namespace BankAccountManager
+﻿using BankAccountManager.Models;
+
+namespace BankAccountManager.Repositories
 {
     public class FakeUsersRepository : IUsersRepository
     {

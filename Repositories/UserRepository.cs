@@ -1,11 +1,13 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using BankAccountManager.Models;
+using BankAccountManager.Utils;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankAccountManager
+namespace BankAccountManager.Repositories
 {
     public class UserRepository : IUsersRepository
     {

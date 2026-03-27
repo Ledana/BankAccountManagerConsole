@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using BankAccountManager.Models;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,7 +9,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankAccountManager
+namespace BankAccountManager.Services
 {
     public class BankAccountServices : IBankAccountServices
     {
@@ -270,7 +271,7 @@ namespace BankAccountManager
         //changing the balance when another bank account transfered money to this
         public void CreditAmount(decimal amount)
         {
-            this._account.ApplyCredit(amount);
+            _account.ApplyCredit(amount);
         }
         public string GetUserId()
         {
@@ -283,7 +284,7 @@ namespace BankAccountManager
         //adding the movement when another bank account transfered money to this
         public void AddMovement(IBankAccountServices bankAccount, decimal amount, DateTime dateTime)
         {
-            this._account.AddMovement($"{bankAccount.GetUserId()} transfered you {amount} at {dateTime}");
+            _account.AddMovement($"{bankAccount.GetUserId()} transfered you {amount} at {dateTime}");
         }
 
         public decimal GetBalance()

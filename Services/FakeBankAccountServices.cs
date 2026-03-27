@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using BankAccountManager.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Time.Testing;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankAccountManager
+namespace BankAccountManager.Services
 {
     public class FakeBankAccountServices : IBankAccountServices
     {

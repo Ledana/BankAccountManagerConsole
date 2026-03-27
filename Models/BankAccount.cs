@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BankAccountManager
+namespace BankAccountManager.Models
 {
     public class BankAccount
     {
