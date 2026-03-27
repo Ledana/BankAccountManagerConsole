@@ -22,5 +22,5 @@ I’m a beginner developer, and this project was my first step into SQL. I chose
 - Create a SQL Server database named Users.
 - Run the script in schema.sql to create tables and seed initial users.
 - Update the connection string in Program.cs.
-- Run the console app and log in with a username.
+- Run the console app and log in with a username. (Inforamtion about users are saved in UserDetails.txt)
 
