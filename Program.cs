@@ -24,8 +24,8 @@ namespace BankAccountManager
                     //allusers choose if you want to work with the real repository which has access
                     //in the database or the fake repository with hard coded users
 
-                    var allUsers = GetRepository(new UserRepository(conn));
-                    //var allUsers = GetRepository(new FakeUsersRepository());
+                    //var allUsers = GetRepository(new UserRepository(conn));
+                    var allUsers = GetRepository(new FakeUsersRepository());
                     var users = allUsers.GetAllUsers();
 
                     Console.WriteLine("Wellcome to our bank app");
@@ -112,7 +112,7 @@ namespace BankAccountManager
                                 input = "0";
                         }
                     }
-                    Console.WriteLine("Thnak you for using our bank!");
+                    Console.WriteLine("Thank you for using our bank!");
 
                 }
                 catch (Exception e)
