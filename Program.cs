@@ -15,110 +15,108 @@ namespace BankAccountManager
         {
             string connectionString = "Server=LAPTOP-VIIQV46I;Database=Users;Trusted_Connection=True;Encrypt=False;";
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using SqlConnection conn = new SqlConnection(connectionString);
+            conn.Open();
+            try
             {
-                conn.Open();
-                try
+                string? username = "";
+                //allusers choose if you want to work with the real repository which has access
+                //in the database or the fake repository with hard coded users
+
+                //var allUsers = GetRepository(new UserRepository(conn));
+                var allUsers = GetRepository(new FakeUsersRepository());
+                var users = allUsers.GetAllUsers();
+
+                Console.WriteLine("Wellcome to our bank app");
+                while (username.ToLower() != "exit")
                 {
-                   string? username = "";
-                    //allusers choose if you want to work with the real repository which has access
-                    //in the database or the fake repository with hard coded users
-
-                    //var allUsers = GetRepository(new UserRepository(conn));
-                    var allUsers = GetRepository(new FakeUsersRepository());
-                    var users = allUsers.GetAllUsers();
-
-                    Console.WriteLine("Wellcome to our bank app");
-                    while (username.ToLower() != "exit")
+                    Console.WriteLine("Please input your username or type 'exit'");
+                    username = Console.ReadLine();
+                    if (string.IsNullOrEmpty(username))
                     {
-                        Console.WriteLine("Please input your username or type 'exit'");
-                        username = Console.ReadLine();
-                        if (string.IsNullOrEmpty(username))
-                        {
-                            Console.WriteLine("The username is not in the right format");
-                            continue;
-                        }
-                        
-                        //everytime a user logs out and the user is asked for username to log in, the list
-                        //of users is updated with the latest change from the database
-                        
-                        users = allUsers.GetAllUsers();
+                        Console.WriteLine("The username is not in the right format");
+                        continue;
+                    }
 
-                        var user = allUsers.FindUserByUsername(username);
+                    //everytime a user logs out and the user is asked for username to log in, the list
+                    //of users is updated with the latest change from the database
 
-                        if (user != null)
+                    users = allUsers.GetAllUsers();
+
+                    var user = allUsers.FindUserByUsername(username);
+
+                    if (user != null)
+                    {
+                        while (true)
                         {
-                            while (true)
+                            Console.WriteLine("Please put you password: ");
+                            //putting the pasword input in the username variable so if 'exit' is typed to close the app
+                            username = Console.ReadLine();
+                            if (username != null)
                             {
-                                Console.WriteLine("Please put you password: ");
-                                //putting the pasword input in the username variable so if 'exit' is typed to close the app
-                                username = Console.ReadLine();
-                                if (username != null)
+                                if (allUsers.ValidatePassword(user.UserId, username))
                                 {
-                                    if (allUsers.ValidatePassword(user.UserId, username))
-                                    {
-                                        Console.WriteLine($"Wellcome {user.FirstName} {user.LastName}");
-                                        Console.WriteLine($"You balance is: {user.GetBankAccountServices.GetBalance():F2}\n");
-                                        break;
-                                    }
-                                    //if the user doesnt remember password can exit the app
-                                    else if (username == "exit")
-                                        break;
-                                    else
-                                    {   
-                                        Console.WriteLine("The password is incorrect, try again or type 'exit' to log out");
-                                    }  
+                                    Console.WriteLine($"Wellcome {user.FirstName} {user.LastName}");
+                                    Console.WriteLine($"You balance is: {user.GetBankAccountServices.GetBalance():F2}\n");
+                                    break;
                                 }
-                                
+                                //if the user doesnt remember password can exit the app
+                                else if (username == "exit")
+                                    break;
+                                else
+                                {
+                                    Console.WriteLine("The password is incorrect, try again or type 'exit' to log out");
+                                }
                             }
-                        }
-                        else
-                        {
-                            Console.WriteLine("The user could not be found try again");
-                            continue;
-                        }
 
-                        if (username == "exit") break;
-
-                        string? input = "";
-                        while (input != "5")
-                        {
-                            ChooseAction();
-                            input = Console.ReadLine();
-                            if (string.IsNullOrEmpty(input))
-                            {
-                                Console.WriteLine("The input is not in the right format");
-                                continue;
-                            }
-                            if (input == "1")
-                            {
-                                Deposit(user);
-                            }
-                            if (input == "2")
-                            {
-                                Withdraw(user);
-                            }
-                            if (input == "3")
-                            {
-                                Transfer(allUsers, user);
-                            }
-                            if (input == "4")
-                            {
-                                PrintAllMovements(user);
-                            }
-                            if (input == "5")
-                                break;
-                            else
-                                input = "0";
                         }
                     }
-                    Console.WriteLine("Thank you for using our bank!");
+                    else
+                    {
+                        Console.WriteLine("The user could not be found try again");
+                        continue;
+                    }
 
+                    if (username == "exit") break;
+
+                    string? input = "";
+                    while (input != "5")
+                    {
+                        ChooseAction();
+                        input = Console.ReadLine();
+                        if (string.IsNullOrEmpty(input))
+                        {
+                            Console.WriteLine("The input is not in the right format");
+                            continue;
+                        }
+                        if (input == "1")
+                        {
+                            Deposit(user);
+                        }
+                        if (input == "2")
+                        {
+                            Withdraw(user);
+                        }
+                        if (input == "3")
+                        {
+                            Transfer(allUsers, user);
+                        }
+                        if (input == "4")
+                        {
+                            PrintAllMovements(user);
+                        }
+                        if (input == "5")
+                            break;
+                        else
+                            input = "0";
+                    }
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.GetType() + e.StackTrace);
-                }
+                Console.WriteLine("Thank you for using our bank!");
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.GetType() + e.StackTrace);
             }
         }
         //getting the repository which can be the real one or the mock
